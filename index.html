@@ -1,0 +1,1776 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2025 전환율/활동 분석 보고서</title>
+    <!-- Tailwind CSS 로드 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js 로드 -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Inter 폰트 (Tailwind 기본) */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        /* Noto Sans KR 폰트 (한국어용) */
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
+        
+        body {
+            font-family: 'Inter', 'Noto Sans KR', sans-serif;
+            background-color: #f8fafc; /* bg-slate-50 */
+        }
+        /* 활성 탭 스타일 */
+        .tab-active {
+            border-bottom-color: #3b82f6; /* blue-600 */
+            color: #3b82f6; /* blue-600 */
+            font-weight: 600;
+        }
+        /* 비활성 탭 스타일 */
+        .tab-inactive {
+            border-bottom-color: transparent;
+            color: #64748b; /* slate-500 */
+        }
+        /* 탭 컨텐츠 숨김 */
+        .tab-content {
+            display: none;
+        }
+        /* 활성 탭 컨텐츠 보임 */
+        .tab-content-active {
+            display: block;
+        }
+        /* 카드 공통 스타일 */
+        .report-card {
+            background-color: white;
+            border-radius: 0.75rem; /* rounded-xl */
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); /* shadow-lg */
+            padding: 1.5rem; /* p-6 */
+            margin-bottom: 1.5rem; /* mb-6 */
+            overflow: hidden;
+        }
+        /* 테이블 스타일 */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem; /* mt-4 */
+        }
+        .data-table th, .data-table td {
+            border: 1px solid #e5e7eb; /* border-gray-200 */
+            padding: 0.75rem 1rem; /* p-3 px-4 */
+            text-align: left;
+            vertical-align: middle; /* 세로 중앙 정렬 */
+        }
+        .data-table th {
+            background-color: #f9fafb; /* bg-gray-50 */
+            font-weight: 600;
+            color: #374151; /* text-gray-700 */
+            cursor: pointer; /* 정렬 가능 표시 */
+            position: relative; /* 아이콘 위치 기준 */
+        }
+         /* 정렬 아이콘 스타일 */
+        .data-table th .sort-icon {
+            display: inline-block;
+            margin-left: 0.25rem;
+            opacity: 0.3; /* 기본 비활성 상태 */
+            transition: opacity 0.2s ease-in-out;
+            font-size: 0.75em; /* 아이콘 크기 약간 줄임 */
+        }
+        .data-table th.sorted-asc .sort-icon,
+        .data-table th.sorted-desc .sort-icon {
+            opacity: 1; /* 활성 상태 */
+        }
+        .data-table td {
+            color: #4b5563; /* text-gray-600 */
+        }
+        .data-table tbody tr:nth-child(even) {
+            background-color: #f9fafb; /* bg-gray-50 */
+        }
+        .data-table td.text-right, .data-table th.text-right {
+            text-align: right;
+        }
+         /* 정렬 불가 헤더 스타일 */
+        .data-table th.no-sort {
+             cursor: default;
+        }
+        .data-table th.no-sort .sort-icon {
+             display: none;
+        }
+
+        /* 숫자 포맷팅 클래스 */
+        .num {
+            font-family: 'Inter', sans-serif;
+            font-weight: 500;
+        }
+        .num-lg {
+            font-family: 'Inter', sans-serif;
+            font-weight: 700;
+            font-size: 1.875rem; /* text-3xl */
+        }
+        .percent {
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            color: #1d4ed8; /* blue-700 */
+        }
+        /* 변화율 스타일 */
+        .change-negative {
+            color: #dc2626; /* red-600 */
+            font-weight: 600;
+        }
+        .change-positive {
+            color: #16a34a; /* green-600 */
+            font-weight: 600;
+        }
+        h1, h2, h3 {
+            font-family: 'Noto Sans KR', 'Inter', sans-serif;
+            font-weight: 700;
+        }
+        h2 {
+            font-size: 1.5rem; /* text-2xl */
+            line-height: 2rem; /* leading-8 */
+            color: #111827; /* text-gray-900 */
+            margin-bottom: 0.5rem; /* mb-2 */
+        }
+        h3 {
+            font-size: 1.125rem; /* text-lg */
+            line-height: 1.75rem; /* leading-7 */
+            color: #1f2937; /* text-gray-800 */
+            margin-bottom: 1rem; /* mb-4 */
+            border-bottom: 2px solid #e5e7eb; /* border-b-2 border-gray-200 */
+            padding-bottom: 0.5rem; /* pb-2 */
+        }
+        
+        /* Stat 카드용 H3 오버라이드 */
+        .stat-card-title {
+            font-size: 1rem; /* text-base */
+            font-weight: 500; /* font-medium */
+            margin-bottom: 0.25rem; /* mb-1 */
+            color: #475569; /* slate-600 */
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+         /* 차트 컨테이너 높이 조정 */
+        .chart-container-sm { height: 12rem; /* h-48 */ }
+        .chart-container-md { height: 20rem; /* h-80 */ }
+        .chart-container-lg { height: 24rem; /* h-96 */ }
+        .chart-container-xl { height: 28rem; /* 약 h-112 */ }
+
+        /* 차트 로딩 메시지 스타일 */
+        .chart-loading {
+            display: flex; /* 기본적으로 보이도록 변경 */
+            justify-content: center;
+            align-items: center;
+            position: absolute; /* 캔버스 위에 겹치도록 */
+            top: 0; left: 0; right: 0; bottom: 0; /* 캔버스 크기와 동일하게 */
+            background-color: rgba(255, 255, 255, 0.8); /* 반투명 배경 */
+            color: #94a3b8; /* slate-400 */
+            font-size: 0.875rem; /* text-sm */
+            z-index: 10; /* 차트 위에 보이도록 */
+        }
+        .chart-wrapper {
+            position: relative; /* 로딩 메시지 위치 기준 */
+        }
+         /* 요약 차트 그리드 레이아웃 */
+        .summary-chart-grid {
+             display: grid;
+             grid-template-columns: repeat(2, minmax(0, 1fr));
+             gap: 1rem; /* gap-4 */
+             margin-bottom: 1.5rem; /* mb-6 */
+        }
+        .summary-chart-card {
+            background-color: #f8fafc; /* bg-slate-50, 약간 다른 배경색 적용 */
+            padding: 1rem; /* p-4 */
+            border-radius: 0.5rem; /* rounded-lg */
+        }
+        .summary-chart-title {
+            font-size: 0.875rem; /* text-sm */
+            color: #475569; /* slate-600 */ /* 색상 약간 조정 */
+            margin-bottom: 0.5rem; /* mb-2 */
+        }
+        /* 차트 요약 텍스트 스타일 */
+        .chart-summary {
+            font-size: 0.75rem; /* text-xs */
+            color: #64748b; /* slate-500 */
+            text-align: center;
+            margin-top: 0.5rem; /* mt-2 */
+        }
+    </style>
+</head>
+<body class="bg-slate-50 p-4 md:p-8">
+
+    <div class="max-w-7xl mx-auto">
+        <!-- 헤더 -->
+        <header class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900">클라우드사업본부 — 2025 전환율/활동 보고서</h1>
+            <p class="text-lg text-gray-600 mt-1">본부장 보고용 정정본 (v3)</p>
+            <p class="text-sm text-gray-500 mt-2">작성 범위: 제공 파일 2종 + 팀 3인(최민·김다민·박진희) + 2025년 데이터</p>
+        </header>
+
+        <!-- 탭 네비게이션 -->
+        <div class="mb-6 border-b border-gray-200">
+            <nav class="-mb-px flex space-x-6" aria-label="Tabs">
+                <button onclick="changeTab(event, 'summary')" class="tab-button tab-active whitespace-nowrap py-3 px-2 border-b-2 text-sm">
+                    Executive Summary
+                </button>
+                <button onclick="changeTab(event, 'trial')" class="tab-button tab-inactive whitespace-nowrap py-3 px-2 border-b-2 text-sm">
+                    Trial 전환 분석
+                </button>
+                <button onclick="changeTab(event, 'pricing')" class="tab-button tab-inactive whitespace-nowrap py-3 px-2 border-b-2 text-sm">
+                    Pricing 전환 분석
+                </button>
+                <button onclick="changeTab(event, 'activity')" class="tab-button tab-inactive whitespace-nowrap py-3 px-2 border-b-2 text-sm">
+                    3분기 활동 분석 (3인)
+                </button>
+            </nav>
+        </div>
+
+        <!-- 탭 컨텐츠 -->
+        <main>
+            <!-- 1. Executive Summary -->
+            <div id="summary" class="tab-content tab-content-active">
+                
+                <div class="report-card">
+                    <h2>Executive Summary</h2>
+                    <ul class="list-disc list-inside text-gray-700 space-y-2">
+                         <li>상반기 Trial 전환율 <span class="percent">16.1%</span> (<span class="num">225/1,397</span>), Pricing 전환율 <span class="percent">27.7%</span> (<span class="num">36/130</span>)</li>
+                        <li>3분기 Trial 전환율 <span class="percent">14.6%</span> (<span class="num">128/879</span>), Pricing 전환율 <span class="percent">19.4%</span> (<span class="num">36/186</span>)
+                           (<span class="change-negative">Trial -1.5%p</span>, <span class="change-negative">Pricing -8.3%p</span>)
+                        </li>
+                        <li>3분기 활동은 Inbound 중심으로 형성:
+                            <ul class="list-disc list-inside ml-6 mt-1">
+                                <li>김다민: Inbound 202건 (<span class="num">33,189.2천원</span>) / Outbound 72건 (<span class="num">9,000.0천원</span>)</li>
+                                <li>최민: Inbound 11건 (<span class="num">680.0천원</span>)</li>
+                            </ul>
+                        </li>
+                        <li>
+                            연간 합계 검증:
+                            <ul class="list-disc list-inside ml-6 mt-1">
+                                <li>김다민: <span class="num">128,393.2천원</span> = Q3 <span class="num">42,189.2천원</span> + Q3외 <span class="num">86,204.0천원</span></li>
+                                <li>최민: <span class="num">208,826.6천원</span> = Q3 <span class="num">680.0천원</span> + Q3외 <span class="num">208,146.6천원</span></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- A) 핵심 KPI 요약 -->
+                    <div class="report-card">
+                        <h3>A) 핵심 KPI 요약</h3>
+                        <!-- KPI 차트 -->
+                        <div class="chart-container-md chart-wrapper">
+                            <canvas id="kpiChart"></canvas>
+                            <div id="kpiChartLoading" class="chart-loading">차트 로딩 중...</div>
+                        </div>
+                        <p class="chart-summary">※ 상반기 대비 3분기 전환율 하락 (Trial -1.5%p, Pricing -8.3%p)</p>
+                        <!-- KPI 테이블 -->
+                        <table class="data-table mt-4" id="kpiTable">
+                            <thead>
+                                <tr>
+                                    <th class="no-sort">구분<span class="sort-icon"></span></th>
+                                    <th class="text-right" data-sort-type="number">배정건수<span class="sort-icon"></span></th>
+                                    <th class="text-right" data-sort-type="number">유료전환건수<span class="sort-icon"></span></th>
+                                    <th class="text-right" data-sort-type="number">유료전환율(%)<span class="sort-icon"></span></th>
+                                    <th class="text-right" data-sort-type="number">상반기 대비<br>변화율 (%p)<span class="sort-icon"></span></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>상반기 Trial</td>
+                                    <td class="num text-right">1,397</td>
+                                    <td class="num text-right">225</td>
+                                    <td class="percent text-right">16.1</td>
+                                    <td class="text-right">-</td>
+                                </tr>
+                                <tr>
+                                    <td>상반기 Pricing</td>
+                                    <td class="num text-right">130</td>
+                                    <td class="num text-right">36</td>
+                                    <td class="percent text-right">27.7</td>
+                                     <td class="text-right">-</td>
+                                </tr>
+                                <tr>
+                                    <td>3분기 Trial</td>
+                                    <td class="num text-right">879</td>
+                                    <td class="num text-right">128</td>
+                                    <td class="percent text-right">14.6</td>
+                                    <td class="change-negative text-right">-1.5</td>
+                                </tr>
+                                <tr>
+                                    <td>3분기 Pricing</td>
+                                    <td class="num text-right">186</td>
+                                    <td class="num text-right">36</td>
+                                    <td class="percent text-right">19.4</td>
+                                    <td class="change-negative text-right">-8.3</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- B) 3분기 활동 요약 -->
+                    <div class="report-card">
+                        <h3>B) 3분기 활동 요약 (김다민/최민)</h3>
+                        <div class="chart-container-md chart-wrapper">
+                            <canvas id="q3ActivityChart"></canvas>
+                            <div id="q3ActivityChartLoading" class="chart-loading">차트 로딩 중...</div>
+                        </div>
+                        <p class="chart-summary">※ 김다민 활동 건수(274건)/매출(42,189.2천원)이 최민(11건/680.0천원) 대비 월등히 높음.</p>
+                        <table class="data-table mt-4" id="q3ActivityTable">
+                             <thead>
+                                <tr>
+                                    <th data-sort-type="string">담당자<span class="sort-icon"></span></th>
+                                    <th class="text-right" data-sort-type="number">활동건수<span class="sort-icon"></span></th>
+                                    <th class="text-right" data-sort-type="number">예상매출합계(천원)<span class="sort-icon"></span></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>김다민</td>
+                                    <td class="num text-right">274</td>
+                                    <td class="num text-right">42,189.2</td>
+                                </tr>
+                                <tr>
+                                    <td>최민</td>
+                                    <td class="num text-right">11</td>
+                                    <td class="num text-right">680.0</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="report-card">
+                    <h3>D) 시사점 및 실행 계획</h3>
+                    <ul class="list-disc list-inside text-gray-700 space-y-2">
+                        <li>Trial→Pricing 전환율은 상반기 대비 3분기에 하락하여(<span class="change-negative">Trial -1.5%p, Pricing -8.3%p</span>), 상위 채널(고객문의/소개/검색) 집중 관리가 필요합니다.</li>
+                        <li>Inbound 성과 극대화와 함께, Outbound는 기록 정합성 확보가 선행되어야 합니다(필드 고정·주간 점검).</li>
+                        <li>Q3 외 피크 월(김다민 2·6·10월)은 레퍼런스/캠페인 반복이 가능한 구간으로, 재현 전략 수립을 제안합니다.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 2. Trial 전환 분석 -->
+            <div id="trial" class="tab-content">
+                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div class="report-card !p-4">
+                        <h3 class="stat-card-title">상반기 Trial (전체)</h3>
+                        <p class="num-lg text-blue-600">16.9%</p>
+                        <p class="text-sm text-slate-500">(671 / 3,966 건)</p>
+                    </div>
+                    <div class="report-card !p-4">
+                        <h3 class="stat-card-title">3분기 Trial (전체)</h3>
+                        <p class="num-lg text-red-600">12.9%</p>
+                        <p class="text-sm text-slate-500">(299 / 2,320 건)</p>
+                    </div>
+                </div>
+                
+                <div class="report-card">
+                    <h3>① 2025 상반기 Trial — 개인별 배정/유료전환 (전체인원)</h3>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="chart-container-lg chart-wrapper">
+                            <canvas id="h1TrialChart"></canvas>
+                             <div id="h1TrialChartLoading" class="chart-loading">차트 로딩 중...</div>
+                        </div>
+                        <div>
+                            <table class="data-table" id="h1TrialTable">
+                                <thead>
+                                    <tr>
+                                        <th data-sort-type="string">담당자<span class="sort-icon"></span></th>
+                                        <th class="text-right" data-sort-type="number">배정건수<span class="sort-icon"></span></th>
+                                        <th class="text-right" data-sort-type="number">유료전환건수<span class="sort-icon"></span></th>
+                                        <th class="text-right" data-sort-type="number">유료전환율(%)<span class="sort-icon"></span></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td>최태현</td><td class="num text-right">862</td><td class="num text-right">140</td><td class="percent text-right">16.2</td></tr>
+                                    <tr><td>박사랑</td><td class="num text-right">737</td><td class="num text-right">126</td><td class="percent text-right">17.1</td></tr>
+                                    <tr><td>최민</td><td class="num text-right">733</td><td class="num text-right">126</td><td class="percent text-right">17.2</td></tr>
+                                    <tr><td>김다민</td><td class="num text-right">514</td><td class="num text-right">83</td><td class="percent text-right">16.1</td></tr>
+                                    <tr><td>허아영</td><td class="num text-right">388</td><td class="num text-right">64</td><td class="percent text-right">16.5</td></tr>
+                                    <tr><td>백민수</td><td class="num text-right">282</td><td class="num text-right">59</td><td class="percent text-right">20.9</td></tr>
+                                    <tr><td>이민수</td><td class="num text-right">205</td><td class="num text-right">37</td><td class="percent text-right">18.0</td></tr>
+                                    <tr><td>박진희</td><td class="num text-right">150</td><td class="num text-right">16</td><td class="percent text-right">10.7</td></tr>
+                                    <tr><td>이가은</td><td class="num text-right">95</td><td class="num text-right">20</td><td class="percent text-right">21.1</td></tr>
+                                    <tr class="font-bold bg-slate-100"><td>합계</td><td class="num text-right">3966</td><td class="num text-right">671</td><td class="percent text-right">16.9</td></tr>
+                                </tbody>
+                            </table>
+                            <p class="chart-summary mt-4">※ 백민수(20.9%), 이가은(21.1%)이 높은 전환율을 보임. 박진희(10.7%)는 상대적으로 낮음.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="report-card">
+                    <h3>② 2025 3분기 Trial — 개인별 배정/유료전환 (전체인원)</h3>
+                    <p class="text-sm text-gray-600 mb-4">배정건수 Top 10 담당자 기준 차트 (외 기타로 분류)</p>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="chart-container-lg chart-wrapper">
+                            <canvas id="q3TrialChart"></canvas>
+                             <div id="q3TrialChartLoading" class="chart-loading">차트 로딩 중...</div>
+                        </div>
+                        <div>
+                            <table class="data-table" id="q3TrialTable">
+                                <thead>
+                                    <tr>
+                                        <th data-sort-type="string">담당자<span class="sort-icon"></span></th>
+                                        <th class="text-right" data-sort-type="number">배정건수<span class="sort-icon"></span></th>
+                                        <th class="text-right" data-sort-type="number">유료전환건수<span class="sort-icon"></span></th>
+                                        <th class="text-right" data-sort-type="number">유료전환율(%)<span class="sort-icon"></span></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td>김다민</td><td class="num text-right">589</td><td class="num text-right">78</td><td class="percent text-right">13.2</td></tr>
+                                    <tr><td>이나은</td><td class="num text-right">535</td><td class="num text-right">73</td><td class="percent text-right">13.6</td></tr>
+                                    <tr><td>김서은</td><td class="num text-right">512</td><td class="num text-right">65</td><td class="percent text-right">12.7</td></tr>
+                                    <tr><td>최민</td><td class="num text-right">120</td><td class="num text-right">23</td><td class="percent text-right">19.2</td></tr>
+                                    <tr><td>최현</td><td class="num text-right">100</td><td class="num text-right">12</td><td class="percent text-right">12.0</td></tr>
+                                    <tr><td>이준수</td><td class="num text-right">100</td><td class="num text-right">10</td><td class="percent text-right">10.0</td></tr>
+                                    <tr><td>김태은</td><td class="num text-right">79</td><td class="num text-right">7</td><td class="percent text-right">8.9</td></tr>
+                                    <tr><td>허아영</td><td class="num text-right">50</td><td class="num text-right">2</td><td class="percent text-right">4.0</td></tr>
+                                    <tr><td>정문승</td><td class="num text-right">34</td><td class="num text-right">1</td><td class="percent text-right">2.9</td></tr>
+                                    <tr><td>박진희</td><td class="num text-right">23</td><td class="num text-right">1</td><td class="percent text-right">4.3</td></tr>
+                                    <tr><td>기타(8명)</td><td class="num text-right">8</td><td class="num text-right">0</td><td class="percent text-right">0.0</td></tr>
+                                    <tr class="font-bold bg-slate-100"><td>합계</td><td class="num text-right">2320</td><td class="num text-right">299</td><td class="percent text-right">12.9</td></tr>
+                                </tbody>
+                            </table>
+                           <p class="chart-summary mt-4">※ 최민(19.2%)이 가장 높은 전환율. 허아영, 정문승, 박진희는 5% 미만.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="report-card">
+                    <h3>①②-확장) Trial 월별 전환율 (김다민/박진희/최민)</h3>
+                    <div class="chart-container-lg chart-wrapper">
+                        <canvas id="monthlyTrialChart"></canvas>
+                        <div id="monthlyTrialChartLoading" class="chart-loading">차트 로딩 중...</div>
+                    </div>
+                    <p class="chart-summary">※ 김다민/박진희는 상반기 초반 대비 하반기 전환율 하락 추세. 최민은 3분기에 비교적 안정적인 전환율 유지.</p>
+                </div>
+            </div>
+
+            <!-- 3. Pricing 전환 분석 -->
+            <div id="pricing" class="tab-content">
+                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div class="report-card !p-4">
+                        <h3 class="stat-card-title">상반기 Pricing (전체)</h3>
+                        <p class="num-lg text-blue-600">24.2%</p>
+                        <p class="text-sm text-slate-500">(79 / 327 건)</p>
+                    </div>
+                    <div class="report-card !p-4">
+                        <h3 class="stat-card-title">3분기 Pricing (3인)</h3>
+                        <p class="num-lg text-red-600">19.4%</p>
+                        <p class="text-sm text-slate-500">(36 / 186 건)</p>
+                    </div>
+                </div>
+
+                <div class="report-card">
+                    <h3>③ 2025 상반기 Pricing — 개인별 배정/유료전환 (전체인원)</h3>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="chart-container-lg chart-wrapper">
+                            <canvas id="h1PricingChart"></canvas>
+                            <div id="h1PricingChartLoading" class="chart-loading">차트 로딩 중...</div>
+                        </div>
+                        <div>
+                            <table class="data-table" id="h1PricingTable">
+                                <thead>
+                                    <tr>
+                                        <th data-sort-type="string">담당자<span class="sort-icon"></span></th>
+                                        <th class="text-right" data-sort-type="number">배정건수<span class="sort-icon"></span></th>
+                                        <th class="text-right" data-sort-type="number">유료전환건수<span class="sort-icon"></span></th>
+                                        <th class="text-right" data-sort-type="number">유료전환율(%)<span class="sort-icon"></span></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td>허아영</td><td class="num text-right">60</td><td class="num text-right">18</td><td class="percent text-right">30.0</td></tr>
+                                    <tr><td>박사랑</td><td class="num text-right">60</td><td class="num text-right">12</td><td class="percent text-right">20.0</td></tr>
+                                    <tr><td>박진희</td><td class="num text-right">57</td><td class="num text-right">19</td><td class="percent text-right">33.3</td></tr>
+                                    <tr><td>최민</td><td class="num text-right">55</td><td class="num text-right">14</td><td class="percent text-right">25.5</td></tr>
+                                    <tr><td>김다민</td><td class="num text-right">47</td><td class="num text-right">5</td><td class="percent text-right">10.6</td></tr>
+                                    <tr><td>이가은</td><td class="num text-right">19</td><td class="num text-right">5</td><td class="percent text-right">26.3</td></tr>
+                                    <tr><td>백민수</td><td class="num text-right">17</td><td class="num text-right">5</td><td class="percent text-right">29.4</td></tr>
+                                    <tr><td>이민수</td><td class="num text-right">12</td><td class="num text-right">1</td><td class="percent text-right">8.3</td></tr>
+                                    <tr class="font-bold bg-slate-100"><td>합계</td><td class="num text-right">327</td><td class="num text-right">79</td><td class="percent text-right">24.2</td></tr>
+                                </tbody>
+                            </table>
+                           <p class="chart-summary mt-4">※ 박진희(33.3%), 허아영(30.0%) 높은 전환율. 김다민(10.6%), 이민수(8.3%)는 낮음.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="report-card">
+                    <h3>④ 2025 3분기 Pricing — 개인별 배정/유료전환 (최민·김다민·박진희)</h3>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="chart-container-md chart-wrapper">
+                            <canvas id="q3PricingChart"></canvas>
+                             <div id="q3PricingChartLoading" class="chart-loading">차트 로딩 중...</div>
+                        </div>
+                        <div>
+                            <table class="data-table" id="q3PricingTable">
+                                <thead>
+                                    <tr>
+                                        <th data-sort-type="string">담당자<span class="sort-icon"></span></th>
+                                        <th class="text-right" data-sort-type="number">배정건수<span class="sort-icon"></span></th>
+                                        <th class="text-right" data-sort-type="number">유료전환건수<span class="sort-icon"></span></th>
+                                        <th class="text-right" data-sort-type="number">유료전환율(%)<span class="sort-icon"></span></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td>최민</td><td class="num text-right">67</td><td class="num text-right">11</td><td class="percent text-right">16.4</td></tr>
+                                    <tr><td>김다민</td><td class="num text-right">73</td><td class="num text-right">14</td><td class="percent text-right">19.2</td></tr>
+                                    <tr><td>박진희</td><td class="num text-right">46</td><td class="num text-right">11</td><td class="percent text-right">23.9</td></tr>
+                                    <tr class="font-bold bg-slate-100"><td>합계</td><td class="num text-right">186</td><td class="num text-right">36</td><td class="percent text-right">19.4</td></tr>
+                                </tbody>
+                            </table>
+                            <p class="chart-summary mt-4">※ 3인 중 박진희(23.9%) 전환율이 가장 높고, 최민(16.4%)이 가장 낮음.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="report-card">
+                    <h3>③④-확장) Pricing 월별 전환율 (김다민/박진희/최민)</h3>
+                    <div class="chart-container-lg chart-wrapper">
+                        <canvas id="monthlyPricingChart"></canvas>
+                         <div id="monthlyPricingChartLoading" class="chart-loading">차트 로딩 중...</div>
+                    </div>
+                    <p class="chart-summary">※ 박진희는 5월, 6월, 9월에 높은 전환율 기록. 최민은 3분기 들어 변동성 증가.</p>
+                </div>
+            </div>
+
+            <!-- 4. 3분기 활동 분석 (3인) -->
+            <div id="activity" class="tab-content">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- 김다민 요약 -->
+                    <div class="report-card">
+                        <h3>⑤ 김다민 — Q3 요약</h3>
+                        
+                        <div class="summary-chart-grid">
+                            <div class="summary-chart-card">
+                                <p class="summary-chart-title">In/Outbound (건수)</p>
+                                <div class="chart-container-sm chart-wrapper">
+                                    <canvas id="kimDaminPieChart"></canvas>
+                                     <div id="kimDaminPieChartLoading" class="chart-loading">차트 로딩 중...</div>
+                                </div>
+                            </div>
+                            <div class="summary-chart-card">
+                                <p class="summary-chart-title">In/Outbound (매출)</p>
+                                <div class="chart-container-sm chart-wrapper">
+                                    <canvas id="kimDaminRevenuePieChart"></canvas>
+                                     <div id="kimDaminRevenuePieChartLoading" class="chart-loading">차트 로딩 중...</div>
+                                </div>
+                            </div>
+                            <div class="summary-chart-card col-span-2">
+                                <p class="summary-chart-title">월별 예상매출 (천원)</p>
+                                <div class="chart-container-sm chart-wrapper">
+                                    <canvas id="kimDaminMonthlyChart"></canvas>
+                                     <div id="kimDaminMonthlyChartLoading" class="chart-loading">차트 로딩 중...</div>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="chart-summary -mt-4 mb-4">※ 활동 건수(74%) 및 매출(79%) 모두 Inbound 비중이 높음. 9월 매출이 가장 높음.</p>
+
+                        <table class="data-table mb-4" id="kimDaminSummaryTable">
+                             <thead>
+                                <tr>
+                                    <th data-sort-type="string">유입구분<span class="sort-icon"></span></th>
+                                    <th class="text-right" data-sort-type="number">활동건수<span class="sort-icon"></span></th>
+                                    <th class="text-right" data-sort-type="number">예상매출합계(천원)<span class="sort-icon"></span></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>Inbound</td><td class="num text-right">202</td><td class="num text-right">33,189.2</td></tr>
+                                <tr><td>Outbound</td><td class="num text-right">72</td><td class="num text-right">9,000.0</td></tr>
+                                <tr class="font-bold bg-slate-100"><td>합계</td><td class="num text-right">274</td><td class="num text-right">42,189.2</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- 최민 요약 -->
+                    <div class="report-card">
+                        <h3>⑤ 최민 — Q3 요약</h3>
+                        <div class="summary-chart-grid">
+                            <div class="summary-chart-card">
+                                <p class="summary-chart-title">In/Outbound (건수)</p>
+                                <div class="chart-container-sm chart-wrapper">
+                                    <canvas id="choiMinPieChart"></canvas>
+                                     <div id="choiMinPieChartLoading" class="chart-loading">차트 로딩 중...</div>
+                                </div>
+                            </div>
+                             <div class="summary-chart-card">
+                                <p class="summary-chart-title">In/Outbound (매출)</p>
+                                <div class="chart-container-sm chart-wrapper">
+                                    <canvas id="choiMinRevenuePieChart"></canvas>
+                                     <div id="choiMinRevenuePieChartLoading" class="chart-loading">차트 로딩 중...</div>
+                                </div>
+                            </div>
+                            <div class="summary-chart-card col-span-2">
+                                <p class="summary-chart-title">월별 예상매출 (천원)</p>
+                                <div class="chart-container-sm chart-wrapper">
+                                    <canvas id="choiMinMonthlyChart"></canvas>
+                                     <div id="choiMinMonthlyChartLoading" class="chart-loading">차트 로딩 중...</div>
+                                </div>
+                            </div>
+                        </div>
+                       <p class="chart-summary -mt-4 mb-4">※ 모든 활동(11건) 및 매출(680.0천원)이 Inbound에서 발생. 8월 매출 비중이 가장 높음.</p>
+
+                        <table class="data-table mb-4" id="choiMinSummaryTable">
+                             <thead>
+                                <tr>
+                                    <th data-sort-type="string">유입구분<span class="sort-icon"></span></th>
+                                    <th class="text-right" data-sort-type="number">활동건수<span class="sort-icon"></span></th>
+                                    <th class="text-right" data-sort-type="number">예상매출합계(천원)<span class="sort-icon"></span></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>Inbound</td><td class="num text-right">11</td><td class="num text-right">680.0</td></tr>
+                                <tr><td>Outbound</td><td class="num text-right">0</td><td class="num text-right">0.0</td></tr>
+                                <tr class="font-bold bg-slate-100"><td>합계</td><td class="num text-right">11</td><td class="num text-right">680.0</td></tr>
+                            </tbody>
+                        </table>
+
+                        <h3 class="mt-6">⑥ 최민 — Q3 채널 세분화</h3>
+                        <div class="mt-4 p-4 rounded-lg bg-yellow-50 border border-yellow-300 text-yellow-800">
+                            <p class="font-semibold">데이터 누락 이슈 (Executive Summary 이슈 ①)</p>
+                            <p class="text-sm">총 활동 11건 (예상매출 680.0천원) 모두 채널 원문이 공백 상태로, 세분화 분석이 불가능합니다.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 김다민 채널 -->
+                <div class="report-card">
+                    <h3>⑥ 김다민 — Q3 채널 세분화 (TOP 15)</h3>
+                     <p class="text-sm text-gray-600 -mt-2 mb-4">막대(총 매출)와 점(평균 매출) 비교</p>
+                    <div class="chart-container-xl chart-wrapper">
+                        <canvas id="kimDaminChannelChart"></canvas>
+                        <div id="kimDaminChannelChartLoading" class="chart-loading">차트 로딩 중...</div>
+                    </div>
+                    <p class="chart-summary">※ '고객 문의' 채널이 총매출 기여도 가장 높음. '소개' 채널은 건당 평균 매출(420.0천원)이 가장 높아 효율적.</p>
+                    <table class="data-table" id="kimDaminChannelTable">
+                         <thead>
+                            <tr>
+                                <th data-sort-type="string">채널(원문)<span class="sort-icon"></span></th>
+                                <th class="text-right" data-sort-type="number">활동건수<span class="sort-icon"></span></th>
+                                <th class="text-right" data-sort-type="number">예상매출합계(천원)<span class="sort-icon"></span></th>
+                                <th class="text-right" data-sort-type="number">평균 예상 매출(천원)<span class="sort-icon"></span></th>
+                            </tr>
+                        </thead>
+                         <tbody>
+                            <tr><td>고객 문의</td><td class="num text-right">50</td><td class="num text-right">12,965.0</td><td class="num text-right">259.3</td></tr>
+                            <tr><td>소개</td><td class="num text-right">14</td><td class="num text-right">5,880.0</td><td class="num text-right change-positive">420.0</td></tr>
+                            <tr><td>모두싸인</td><td class="num text-right">12</td><td class="num text-right">1,500.0</td><td class="num text-right">125.0</td></tr>
+                            <tr><td>네이버 검색</td><td class="num text-right">10</td><td class="num text-right">1,400.0</td><td class="num text-right">140.0</td></tr>
+                            <tr><td>기존고객 소개</td><td class="num text-right">7</td><td class="num text-right">1,200.0</td><td class="num text-right">171.4</td></tr>
+                            <tr><td>홈페이지</td><td class="num text-right">6</td><td class="num text-right">1,180.0</td><td class="num text-right">196.7</td></tr>
+                            <tr><td>검색</td><td class="num text-right">5</td><td class="num text-right">1,100.0</td><td class="num text-right">220.0</td></tr>
+                            <tr><td>PRICING</td><td class="num text-right">6</td><td class="num text-right">1,040.0</td><td class="num text-right">173.3</td></tr>
+                            <tr><td>광고</td><td class="num text-right">5</td><td class="num text-right">1,000.0</td><td class="num text-right">200.0</td></tr>
+                            <tr><td>구글검색</td><td class="num text-right">3</td><td class="num text-right">700.0</td><td class="num text-right">233.3</td></tr>
+                            <tr><td>DM</td><td class="num text-right">4</td><td class="num text-right">600.0</td><td class="num text-right">150.0</td></tr>
+                            <tr><td>대표님 소개</td><td class="num text-right">3</td><td class="num text-right">500.0</td><td class="num text-right">166.7</td></tr>
+                            <tr><td>본부장님 소개</td><td class="num text-right">2</td><td class="num text-right">400.0</td><td class="num text-right">200.0</td></tr>
+                            <tr><td>파트너 소개</td><td class="num text-right">2</td><td class="num text-right">300.0</td><td class="num text-right">150.0</td></tr>
+                            <tr><td>행사 리드</td><td class="num text-right">2</td><td class="num text-right">280.0</td><td class="num text-right">140.0</td></tr>
+                         </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // ---------------------------------------------------------------------
+        // 탭 변경 로직
+        // ---------------------------------------------------------------------
+        function changeTab(event, tabID) {
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(content => content.classList.remove('tab-content-active'));
+            const tabButtons = document.querySelectorAll('.tab-button');
+            tabButtons.forEach(button => {
+                button.classList.remove('tab-active');
+                button.classList.add('tab-inactive');
+            });
+            const targetTab = document.getElementById(tabID);
+            if(targetTab) {
+                targetTab.classList.add('tab-content-active');
+            }
+            if(event && event.currentTarget) {
+                event.currentTarget.classList.add('tab-active');
+                event.currentTarget.classList.remove('tab-inactive');
+            }
+             setTimeout(() => {
+                window.dispatchEvent(new Event('resize'));
+             }, 0);
+        }
+
+        // ---------------------------------------------------------------------
+        // 테이블 정렬 로직
+        // ---------------------------------------------------------------------
+         function sortTable(tableId, columnIndex, sortType) {
+            const table = document.getElementById(tableId);
+            if (!table) return;
+            const tbody = table.querySelector('tbody');
+            if (!tbody) return;
+            // '합계' 행과 같은 요약 행을 정렬에서 제외
+            const rows = Array.from(tbody.querySelectorAll('tr')).filter(row => !row.classList.contains('font-bold'));
+            const summaryRows = Array.from(tbody.querySelectorAll('tr')).filter(row => row.classList.contains('font-bold'));
+            
+            if (rows.length === 0) return;
+            const header = table.querySelectorAll('th')[columnIndex];
+            if (!header || header.classList.contains('no-sort')) return;
+            const isAscending = !header.classList.contains('sorted-asc');
+            
+            // 모든 헤더의 정렬 상태 초기화
+            table.querySelectorAll('th').forEach(th => {
+                th.classList.remove('sorted-asc', 'sorted-desc');
+                const icon = th.querySelector('.sort-icon');
+                if (icon) icon.textContent = '▲▼';
+            });
+            
+            rows.sort((a, b) => {
+                let cellA = a.querySelectorAll('td')[columnIndex];
+                let cellB = b.querySelectorAll('td')[columnIndex];
+                if (!cellA || !cellB) return 0;
+                let valA = cellA.textContent.trim();
+                let valB = cellB.textContent.trim();
+                
+                if (sortType === 'number') {
+                    // '-' 값은 정렬 시 가장 낮은 값으로 처리 (ASC 시 맨 위, DESC 시 맨 아래)
+                    if (valA === '-') valA = isAscending ? Infinity : -Infinity;
+                    else valA = parseFloat(valA.replace(/[,%p천원]/g, '')) || 0;
+                     
+                    if (valB === '-') valB = isAscending ? Infinity : -Infinity;
+                    else valB = parseFloat(valB.replace(/[,%p천원]/g, '')) || 0;
+                } else if (sortType === 'string') {
+                    valA = valA.toLowerCase();
+                    valB = valB.toLowerCase();
+                }
+
+                if (valA < valB) return isAscending ? -1 : 1;
+                if (valA > valB) return isAscending ? 1 : -1;
+                return 0;
+            });
+            
+            // 정렬된 행 다시 추가
+            rows.forEach(row => tbody.appendChild(row));
+            // 요약 행(들)을 테이블 맨 아래에 다시 추가
+            summaryRows.forEach(row => tbody.appendChild(row));
+            
+            // 현재 클릭된 헤더에 정렬 상태 적용
+            header.classList.toggle('sorted-asc', isAscending);
+            header.classList.toggle('sorted-desc', !isAscending);
+            const icon = header.querySelector('.sort-icon');
+             if (icon) icon.textContent = isAscending ? '▲' : '▼';
+        }
+
+        // ---------------------------------------------------------------------
+        // 공통 차트 옵션
+        // ---------------------------------------------------------------------
+        const commonChartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        font: { family: "'Noto Sans KR', sans-serif" }
+                    }
+                },
+                tooltip: {
+                    titleFont: { family: "'Noto Sans KR', sans-serif" },
+                    bodyFont: { family: "'Noto Sans KR', sans-serif" },
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.dataset.label || context.label || '';
+                            if (label) { label += ': '; }
+                            let value = context.raw;
+                            
+                            if (typeof value === 'number') {
+                                // %가 아닐 때만 소수점 1자리 표시 (금액/건수 등)
+                                if (!(context.dataset.yAxisID === 'yRate' || (context.dataset.label && context.dataset.label.includes('전환율')))) {
+                                     // 건수는 소수점 없이 표시
+                                    if (context.dataset.yAxisID === 'yCount' || context.xAxisID === 'xCount' || (context.dataset.label && context.dataset.label.includes('건수'))) {
+                                         value = value.toLocaleString('ko-KR');
+                                    } else {
+                                        value = value.toLocaleString('ko-KR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+                                    }
+                                } else {
+                                     value = value.toLocaleString('ko-KR'); // %는 그대로
+                                }
+                            }
+                            
+                            if (context.dataset.yAxisID === 'yRate' || (context.dataset.label && context.dataset.label.includes('전환율'))) {
+                                value += '%';
+                            }
+                            return label + value;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    ticks: { font: { family: "'Noto Sans KR', sans-serif" } },
+                    grid: { display: false }
+                },
+                y: {
+                    ticks: {
+                        font: { family: "'Noto Sans KR', sans-serif" },
+                        callback: function(value) {
+                           if (typeof value === 'number') {
+                               // 로그 스케일 등에서 비정상적인 값 표시 방지
+                               if (value > 0 && Math.log10(value) % 1 !== 0 && this.type === 'logarithmic') {
+                                    return ''; // 로그 눈금의 중간 값들은 숨김
+                               }
+                               return value.toLocaleString('ko-KR');
+                           }
+                           return value;
+                        }
+                    },
+                    beginAtZero: true
+                }
+            }
+        };
+        
+        const pieTooltipCallback = {
+            label: function(context) {
+                let label = context.label || '';
+                if (label) { label += ': '; }
+                let value = context.raw;
+                let unit = context.dataset.label || ''; // 데이터셋 레이블에서 단위 가져오기 (예: '건', '천원')
+                
+                if (typeof value === 'number') {
+                    if (unit === '천원') {
+                        value = value.toLocaleString('ko-KR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+                    } else {
+                        value = value.toLocaleString('ko-KR'); // 건수는 소수점 없이
+                    }
+                }
+                
+                const total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                const percentage = total > 0 ? ((context.raw / total) * 100).toFixed(1) : 0;
+                
+                return `${label}: ${value}${unit ? unit : ''} (${percentage}%)`;
+            }
+        };
+
+        // ⭐️ FIX: pieOptions 정의 추가 (Turn 27에서 누락된 부분 복원)
+        const pieOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom', labels: { font: { family: "'Noto Sans KR', sans-serif" }} },
+                tooltip: {
+                    titleFont: { family: "'Noto Sans KR', sans-serif" },
+                    bodyFont: { family: "'Noto Sans KR', sans-serif" },
+                    callbacks: pieTooltipCallback
+                }
+            }
+        };
+
+        // ---------------------------------------------------------------------
+        // 차트 생성 함수들
+        // ---------------------------------------------------------------------
+         function hideLoadingMessage(chartId) {
+             const loadingEl = document.getElementById(chartId + 'Loading');
+             if (loadingEl) {
+                 loadingEl.style.display = 'none';
+             }
+        }
+
+        function createChart(id, config, loadingId) {
+            const ctx = document.getElementById(id)?.getContext('2d');
+            if (!ctx) return;
+            try {
+                new Chart(ctx, config);
+            } catch (e) {
+                console.error(`Chart creation failed for ${id}:`, e);
+                const loadingEl = document.getElementById(loadingId);
+                if (loadingEl) {
+                    loadingEl.textContent = '차트 로딩 실패';
+                    loadingEl.style.color = '#dc2626'; // red-600
+                }
+            }
+        }
+
+
+        function createKpiChart() {
+            const config = {
+                type: 'bar',
+                data: {
+                    labels: ['상반기 Trial', '상반기 Pricing', '3분기 Trial', '3분기 Pricing'],
+                    datasets: [
+                        {
+                            label: '유료전환율 (%)',
+                            data: [16.1, 27.7, 14.6, 19.4],
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            borderColor: 'rgba(59, 130, 246, 1)',
+                            type: 'line', 
+                            yAxisID: 'yRate', 
+                            tension: 0.1,
+                            fill: true,
+                            order: 1
+                        },
+                        {
+                            label: '배정건수',
+                            data: [1397, 130, 879, 186],
+                            backgroundColor: 'rgba(156, 163, 175, 0.5)',
+                            borderColor: 'rgba(156, 163, 175, 1)',
+                            yAxisID: 'yCount', 
+                            order: 2
+                        },
+                        {
+                            label: '유료전환건수',
+                            data: [225, 36, 128, 36],
+                            backgroundColor: 'rgba(29, 78, 216, 0.7)',
+                            borderColor: 'rgba(29, 78, 216, 1)',
+                            yAxisID: 'yCount', 
+                            order: 3
+                        }
+                    ]
+                },
+                options: {
+                    ...commonChartOptions,
+                    plugins: {
+                        ...commonChartOptions.plugins,
+                        tooltip: {
+                            ...commonChartOptions.plugins.tooltip,
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || context.label || '';
+                                    if (label) { label += ': '; }
+                                    let value = context.raw;
+                                    if (typeof value === 'number') {
+                                        if (context.dataset.yAxisID === 'yCount' || (context.dataset.label && context.dataset.label.includes('건수'))) {
+                                             value = value.toLocaleString('ko-KR');
+                                        } else {
+                                            value = value.toLocaleString('ko-KR');
+                                        }
+                                    }
+                                    if (context.dataset.yAxisID === 'yRate' || (context.dataset.label && context.dataset.label.includes('전환율'))) {
+                                        value += '%';
+                                    }
+                                    return label + value;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { ...commonChartOptions.scales.x },
+                        yCount: {
+                            type: 'linear',
+                            position: 'left',
+                            beginAtZero: true,
+                            title: { display: true, text: '건수' },
+                            ticks: { 
+                               precision: 0,
+                               callback: function(value) {
+                                   return value.toLocaleString('ko-KR');
+                               }
+                            }
+                        },
+                        yRate: {
+                            type: 'linear',
+                            position: 'right',
+                            beginAtZero: true,
+                            title: { display: true, text: '전환율 (%)' },
+                            grid: { drawOnChartArea: false, },
+                            ticks: { callback: value => value + '%' }
+                        }
+                    },
+                    animation: {
+                        onComplete: () => hideLoadingMessage('kpiChart')
+                    }
+                 }
+            };
+            createChart('kpiChart', config, 'kpiChartLoading');
+        }
+
+        function createQ3ActivityChart() {
+             const config = {
+                type: 'bar',
+                data: {
+                    labels: ['김다민', '최민'],
+                    datasets: [
+                        {
+                            label: '예상매출합계 (천원)',
+                            data: [42189.2, 680.0],
+                            backgroundColor: 'rgba(16, 185, 129, 0.7)', // emerald-500
+                            borderColor: 'rgba(16, 185, 129, 1)',
+                            yAxisID: 'yAmount',
+                        },
+                        {
+                            label: '활동건수',
+                            data: [274, 11],
+                            backgroundColor: 'rgba(249, 115, 22, 0.7)', // orange-500
+                            borderColor: 'rgba(249, 115, 22, 1)',
+                            yAxisID: 'yCount',
+                        }
+                    ]
+                },
+                options: {
+                    ...commonChartOptions,
+                    scales: {
+                        x: { ...commonChartOptions.scales.x, grid: { display: false } },
+                        yAmount: {
+                            type: 'logarithmic',
+                            position: 'left',
+                            title: { display: true, text: '예상매출 (천원)' },
+                            ticks: {
+                                callback: function(value, index, ticks) {
+                                   const logValue = Math.log10(value);
+                                   if (value > 0 && logValue === Math.floor(logValue)) {
+                                       return value.toLocaleString('ko-KR');
+                                   }
+                                   // 680과 42189를 모두 포함하는 범위이므로 수동 값 추가
+                                   if (value === 600 || value === 800 || value === 6000 || value === 8000) {
+                                       return value.toLocaleString('ko-KR');
+                                   }
+                                   return '';
+                               },
+                               suggestedMin: 100, 
+                               suggestedMax: 50000 
+                            }
+                        },
+                        yCount: {
+                            position: 'right',
+                            title: { display: true, text: '활동건수' },
+                            grid: { drawOnChartArea: false },
+                            ticks: { precision: 0, callback: function(value) { return value.toLocaleString('ko-KR'); } }
+                        }
+                    },
+                    plugins: { ...commonChartOptions.plugins, legend: { position: 'bottom' } },
+                    animation: {
+                        onComplete: () => hideLoadingMessage('q3ActivityChart')
+                    }
+                 }
+            };
+            createChart('q3ActivityChart', config, 'q3ActivityChartLoading');
+        }
+
+        function createH1TrialChart() {
+            const config = {
+                type: 'bar',
+                data: {
+                    labels: ['최태현', '박사랑', '최민', '김다민', '허아영', '백민수', '이민수', '박진희', '이가은'],
+                    datasets: [
+                        {
+                            label: '유료전환율 (%)',
+                            data: [16.2, 17.1, 17.2, 16.1, 16.5, 20.9, 18.0, 10.7, 21.1],
+                            backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                            borderColor: 'rgba(59, 130, 246, 1)',
+                            type: 'line',
+                            yAxisID: 'yRate',
+                            tension: 0.1
+                        },
+                        {
+                            label: '배정건수',
+                            data: [862, 737, 733, 514, 388, 282, 205, 150, 95],
+                            backgroundColor: 'rgba(156, 163, 175, 0.5)',
+                            borderColor: 'rgba(156, 163, 175, 1)',
+                            yAxisID: 'yCount',
+                        }
+                    ]
+                },
+                options: {
+                    ...commonChartOptions,
+                    plugins: {
+                        ...commonChartOptions.plugins,
+                        tooltip: {
+                            ...commonChartOptions.plugins.tooltip,
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || context.label || '';
+                                    if (label) { label += ': '; }
+                                    let value = context.raw;
+                                    if (typeof value === 'number') {
+                                        if (context.dataset.yAxisID === 'yCount' || (context.dataset.label && context.dataset.label.includes('건수'))) {
+                                             value = value.toLocaleString('ko-KR');
+                                        } else {
+                                            value = value.toLocaleString('ko-KR');
+                                        }
+                                    }
+                                    if (context.dataset.yAxisID === 'yRate' || (context.dataset.label && context.dataset.label.includes('전환율'))) {
+                                        value += '%';
+                                    }
+                                    return label + value;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { ...commonChartOptions.scales.x },
+                        yCount: {
+                            position: 'left',
+                            title: { display: true, text: '배정건수' },
+                            ticks: { 
+                               precision: 0,
+                               callback: function(value) {
+                                   return value.toLocaleString('ko-KR');
+                               }
+                            }
+                        },
+                        yRate: {
+                            position: 'right',
+                            title: { display: true, text: '전환율 (%)' },
+                            grid: { drawOnChartArea: false },
+                            ticks: { callback: value => value + '%' }
+                        }
+                    },
+                    animation: {
+                        onComplete: () => hideLoadingMessage('h1TrialChart')
+                    }
+                 }
+            };
+            createChart('h1TrialChart', config, 'h1TrialChartLoading');
+        }
+
+        function createQ3TrialChart() {
+            const config = {
+                type: 'bar',
+                data: {
+                    labels: ['김다민', '이나은', '김서은', '최민', '최현', '이준수', '김태은', '허아영', '정문승', '박진희', '기타'],
+                    datasets: [
+                        {
+                            label: '유료전환율 (%)',
+                            data: [13.2, 13.6, 12.7, 19.2, 12.0, 10.0, 8.9, 4.0, 2.9, 4.3, 0.0],
+                            backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                            borderColor: 'rgba(59, 130, 246, 1)',
+                            type: 'line',
+                            yAxisID: 'yRate',
+                            tension: 0.1
+                        },
+                        {
+                            label: '배정건수',
+                            data: [589, 535, 512, 120, 100, 100, 79, 50, 34, 23, 8],
+                            backgroundColor: 'rgba(156, 163, 175, 0.5)',
+                            borderColor: 'rgba(156, 163, 175, 1)',
+                            yAxisID: 'yCount',
+                        }
+                    ]
+                },
+                 options: {
+                    ...commonChartOptions,
+                    plugins: {
+                        ...commonChartOptions.plugins,
+                        tooltip: {
+                            ...commonChartOptions.plugins.tooltip,
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || context.label || '';
+                                    if (label) { label += ': '; }
+                                    let value = context.raw;
+                                    if (typeof value === 'number') {
+                                        if (context.dataset.yAxisID === 'yCount' || (context.dataset.label && context.dataset.label.includes('건수'))) {
+                                             value = value.toLocaleString('ko-KR');
+                                        } else {
+                                            value = value.toLocaleString('ko-KR');
+                                        }
+                                    }
+                                    if (context.dataset.yAxisID === 'yRate' || (context.dataset.label && context.dataset.label.includes('전환율'))) {
+                                        value += '%';
+                                    }
+                                    return label + value;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { ticks: { ...commonChartOptions.scales.x.ticks, maxRotation: 45, minRotation: 45 } }, 
+                        yCount: {
+                            position: 'left',
+                            title: { display: true, text: '배정건수' },
+                            ticks: {
+                               precision: 0,
+                               callback: function(value) {
+                                   return value.toLocaleString('ko-KR');
+                               }
+                            }
+                        },
+                        yRate: {
+                            position: 'right',
+                            title: { display: true, text: '전환율 (%)' },
+                            grid: { drawOnChartArea: false },
+                            ticks: { callback: value => value + '%' }
+                        }
+                    },
+                    animation: {
+                        onComplete: () => hideLoadingMessage('q3TrialChart')
+                    }
+                 }
+            };
+            createChart('q3TrialChart', config, 'q3TrialChartLoading');
+        }
+
+        function createMonthlyTrialChart() {
+            const config = {
+                type: 'line',
+                data: {
+                    labels: ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월'],
+                    datasets: [
+                        {
+                            label: '김다민 (전환율 %)',
+                            data: [21.0, 33.3, 30.8, 14.5, 11.7, 14.1, 13.0, 15.2, 10.7],
+                            borderColor: 'rgba(239, 68, 68, 1)', // red-500
+                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                            tension: 0.1,
+                            fill: true
+                        },
+                        {
+                            label: '박진희 (전환율 %)',
+                            data: [5.0, 13.3, 33.3, 100.0, null, 9.4, 16.6, 16.7, 0.0], 
+                            borderColor: 'rgba(34, 197, 94, 1)', // green-500
+                            backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                            tension: 0.1,
+                            spanGaps: true,
+                            fill: true
+                        },
+                         {
+                            label: '최민 (전환율 %)',
+                            data: [18.2, 15.1, null, null, null, null, 19.0, 20.0, 20.0], 
+                            borderColor: 'rgba(59, 130, 246, 1)', // blue-500
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            tension: 0.1,
+                            spanGaps: true,
+                            fill: true
+                        }
+                    ]
+                },
+                options: {
+                    ...commonChartOptions,
+                    plugins: {
+                        ...commonChartOptions.plugins,
+                        tooltip: {
+                            ...commonChartOptions.plugins.tooltip,
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || context.label || '';
+                                    if (label) { label += ': '; }
+                                    let value = context.raw;
+                                    if (typeof value === 'number') {
+                                        value = value.toLocaleString('ko-KR');
+                                    }
+                                    if (context.dataset.yAxisID === 'yRate' || (context.dataset.label && context.dataset.label.includes('전환율'))) {
+                                        value += '%';
+                                    }
+                                    return label + value;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        ...commonChartOptions.scales,
+                        y: {
+                            ...commonChartOptions.scales.y,
+                            title: { display: true, text: '유료전환율 (%)' },
+                            ticks: { callback: value => value + '%' }
+                        }
+                    },
+                    animation: {
+                        onComplete: () => hideLoadingMessage('monthlyTrialChart')
+                    }
+                 }
+            };
+            createChart('monthlyTrialChart', config, 'monthlyTrialChartLoading');
+        }
+
+        function createH1PricingChart() {
+            const config = {
+                type: 'bar',
+                data: {
+                    labels: ['허아영', '박사랑', '박진희', '최민', '김다민', '이가은', '백민수', '이민수'],
+                    datasets: [
+                        {
+                            label: '유료전환율 (%)',
+                            data: [30.0, 20.0, 33.3, 25.5, 10.6, 26.3, 29.4, 8.3],
+                            backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                            borderColor: 'rgba(59, 130, 246, 1)',
+                            type: 'line',
+                            yAxisID: 'yRate',
+                            tension: 0.1
+                        },
+                        {
+                            label: '배정건수',
+                            data: [60, 60, 57, 55, 47, 19, 17, 12],
+                            backgroundColor: 'rgba(156, 163, 175, 0.5)',
+                            borderColor: 'rgba(156, 163, 175, 1)',
+                            yAxisID: 'yCount',
+                        }
+                    ]
+                },
+                options: {
+                    ...commonChartOptions,
+                    plugins: {
+                        ...commonChartOptions.plugins,
+                        tooltip: {
+                            ...commonChartOptions.plugins.tooltip,
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || context.label || '';
+                                    if (label) { label += ': '; }
+                                    let value = context.raw;
+                                    if (typeof value === 'number') {
+                                        if (context.dataset.yAxisID === 'yCount' || (context.dataset.label && context.dataset.label.includes('건수'))) {
+                                             value = value.toLocaleString('ko-KR');
+                                        } else {
+                                            value = value.toLocaleString('ko-KR');
+                                        }
+                                    }
+                                    if (context.dataset.yAxisID === 'yRate' || (context.dataset.label && context.dataset.label.includes('전환율'))) {
+                                        value += '%';
+                                    }
+                                    return label + value;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { ...commonChartOptions.scales.x },
+                        yCount: {
+                            position: 'left',
+                            title: { display: true, text: '배정건수' },
+                            ticks: { 
+                               precision: 0,
+                               callback: function(value) {
+                                   return value.toLocaleString('ko-KR');
+                               }
+                            }
+                        },
+                        yRate: {
+                            position: 'right',
+                            title: { display: true, text: '전환율 (%)' },
+                            grid: { drawOnChartArea: false },
+                            ticks: { callback: value => value + '%' }
+                        }
+                    },
+                    animation: {
+                        onComplete: () => hideLoadingMessage('h1PricingChart')
+                    }
+                 }
+            };
+            createChart('h1PricingChart', config, 'h1PricingChartLoading');
+        }
+
+        function createQ3PricingChart() {
+             const config = {
+                type: 'bar',
+                data: {
+                    labels: ['최민', '김다민', '박진희'],
+                    datasets: [
+                        {
+                            label: '유료전환율 (%)',
+                            data: [16.4, 19.2, 23.9],
+                            backgroundColor: 'rgba(59, 130, 246, 0.7)', // blue-500
+                            borderColor: 'rgba(59, 130, 246, 1)',
+                            yAxisID: 'yRate',
+                            order: 1
+                        },
+                        {
+                            label: '배정건수',
+                            data: [67, 73, 46],
+                            backgroundColor: 'rgba(156, 163, 175, 0.5)', // gray-400
+                            borderColor: 'rgba(156, 163, 175, 1)',
+                            yAxisID: 'yCount',
+                            order: 2
+                        }
+                    ]
+                },
+                options: {
+                    ...commonChartOptions,
+                    plugins: {
+                        ...commonChartOptions.plugins,
+                        tooltip: {
+                            ...commonChartOptions.plugins.tooltip,
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || context.label || '';
+                                    if (label) { label += ': '; }
+                                    let value = context.raw;
+                                    if (typeof value === 'number') {
+                                        if (context.dataset.yAxisID === 'yCount' || (context.dataset.label && context.dataset.label.includes('건수'))) {
+                                             value = value.toLocaleString('ko-KR');
+                                        } else {
+                                            value = value.toLocaleString('ko-KR');
+                                        }
+                                    }
+                                    if (context.dataset.yAxisID === 'yRate' || (context.dataset.label && context.dataset.label.includes('전환율'))) {
+                                        value += '%';
+                                    }
+                                    return label + value;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { ...commonChartOptions.scales.x },
+                        yCount: {
+                            position: 'left',
+                            title: { display: true, text: '배정건수' },
+                             ticks: { 
+                               precision: 0,
+                               callback: function(value) {
+                                   return value.toLocaleString('ko-KR');
+                               }
+                            }
+                        },
+                        yRate: {
+                            position: 'right',
+                            title: { display: true, text: '전환율 (%)' },
+                            grid: { drawOnChartArea: false },
+                            ticks: { callback: value => value + '%' }
+                        }
+                    },
+                    animation: {
+                        onComplete: () => hideLoadingMessage('q3PricingChart')
+                    }
+                 }
+            };
+            createChart('q3PricingChart', config, 'q3PricingChartLoading');
+        }
+
+        function createMonthlyPricingChart() {
+            const config = {
+                type: 'line',
+                data: {
+                    labels: ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월'],
+                    datasets: [
+                        {
+                            label: '김다민 (전환율 %)',
+                            data: [null, null, null, 12.5, 0.0, 25.0, 33.3, 15.4, 12.8],
+                            borderColor: 'rgba(239, 68, 68, 1)', // red-500
+                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                            tension: 0.1,
+                            spanGaps: true,
+                            fill: true
+                        },
+                        {
+                            label: '박진희 (전환율 %)',
+                            data: [25.0, 0.0, 9.1, 33.3, 71.4, 66.7, 22.7, 17.6, 42.9], 
+                            borderColor: 'rgba(34, 197, 94, 1)', // green-500
+                            backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                            tension: 0.1,
+                            fill: true
+                        },
+                         {
+                            label: '최민 (전환율 %)',
+                            data: [0.0, 40.0, 25.0, 23.1, 28.6, 27.3, 20.0, 31.6, 6.1],
+                            borderColor: 'rgba(59, 130, 246, 1)', // blue-500
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            tension: 0.1,
+                            fill: true
+                        }
+                    ]
+                },
+                options: {
+                    ...commonChartOptions,
+                    plugins: {
+                        ...commonChartOptions.plugins,
+                        tooltip: {
+                            ...commonChartOptions.plugins.tooltip,
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || context.label || '';
+                                    if (label) { label += ': '; }
+                                    let value = context.raw;
+                                    if (typeof value === 'number') {
+                                        value = value.toLocaleString('ko-KR');
+                                    }
+                                    if (context.dataset.yAxisID === 'yRate' || (context.dataset.label && context.dataset.label.includes('전환율'))) {
+                                        value += '%';
+                                    }
+                                    return label + value;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        ...commonChartOptions.scales,
+                        y: {
+                            ...commonChartOptions.scales.y,
+                            title: { display: true, text: '유료전환율 (%)' },
+                            ticks: { callback: value => value + '%' }
+                        }
+                    },
+                    animation: {
+                        onComplete: () => hideLoadingMessage('monthlyPricingChart')
+                    }
+                 }
+            };
+            createChart('monthlyPricingChart', config, 'monthlyPricingChartLoading');
+        }
+
+        function createKimDaminCharts() {
+            const pieConfig = {
+                type: 'doughnut',
+                data: {
+                    labels: ['Inbound', 'Outbound'],
+                    datasets: [{
+                        label: '건',
+                        data: [202, 72],
+                        backgroundColor: ['rgba(59, 130, 246, 0.8)', 'rgba(107, 114, 128, 0.7)'],
+                        borderColor: ['#FFFFFF', '#FFFFFF']
+                    }]
+                },
+                options: { ...pieOptions, animation: { onComplete: () => hideLoadingMessage('kimDaminPieChart') } }
+            };
+            createChart('kimDaminPieChart', pieConfig, 'kimDaminPieChartLoading');
+
+            const revenuePieConfig = {
+                 type: 'doughnut',
+                 data: {
+                    labels: ['Inbound', 'Outbound'],
+                    datasets: [{
+                        label: '천원',
+                        data: [33189.2, 9000.0],
+                        backgroundColor: ['rgba(59, 130, 246, 0.8)', 'rgba(107, 114, 128, 0.7)'],
+                        borderColor: ['#FFFFFF', '#FFFFFF']
+                    }]
+                 },
+                 options: { ...pieOptions, animation: { onComplete: () => hideLoadingMessage('kimDaminRevenuePieChart') } }
+            };
+            createChart('kimDaminRevenuePieChart', revenuePieConfig, 'kimDaminRevenuePieChartLoading');
+
+            const monthlyConfig = {
+                 type: 'bar',
+                 data: {
+                    labels: ['7월', '8월', '9월'],
+                    datasets: [{
+                        label: '예상매출 (천원)',
+                        data: [7826.2, 12963.0, 21400.0],
+                        backgroundColor: ['#dbeafe', '#bfdbfe', '#93c5fd'],
+                        borderColor: '#60a5fa',
+                        borderWidth: 1
+                    }]
+                 },
+                 options: {
+                    ...commonChartOptions,
+                     scales: {
+                        x: { ...commonChartOptions.scales.x },
+                        y: { ...commonChartOptions.scales.y, ticks: { ...commonChartOptions.scales.y.ticks } }
+                     },
+                    plugins: { 
+                        legend: { display: false }, 
+                        tooltip: {
+                             ...commonChartOptions.plugins.tooltip,
+                             callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || context.label || '';
+                                    if (label) { label += ': '; }
+                                    let value = context.raw;
+                                    if (typeof value === 'number') {
+                                        value = value.toLocaleString('ko-KR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+                                    }
+                                    return label + value;
+                                }
+                            }
+                        }
+                    },
+                    animation: {
+                        onComplete: () => hideLoadingMessage('kimDaminMonthlyChart')
+                    }
+                 }
+            };
+            createChart('kimDaminMonthlyChart', monthlyConfig, 'kimDaminMonthlyChartLoading');
+
+            const channelData = [
+                { channel: '고객 문의', count: 50, revenue: 12965.0 }, { channel: '소개', count: 14, revenue: 5880.0 },
+                { channel: '모두싸인', count: 12, revenue: 1500.0 }, { channel: '네이버 검색', count: 10, revenue: 1400.0 },
+                { channel: '기존고객 소개', count: 7, revenue: 1200.0 }, { channel: '홈페이지', count: 6, revenue: 1180.0 },
+                { channel: '검색', count: 5, revenue: 1100.0 }, { channel: 'PRICING', count: 6, revenue: 1040.0 },
+                { channel: '광고', count: 5, revenue: 1000.0 }, { channel: '구글검색', count: 3, revenue: 700.0 },
+                { channel: 'DM', count: 4, revenue: 600.0 }, { channel: '대표님 소개', count: 3, revenue: 500.0 },
+                { channel: '본부장님 소개', count: 2, revenue: 400.0 }, { channel: '파트너 소개', count: 2, revenue: 300.0 },
+                { channel: '행사 리드', count: 2, revenue: 280.0 }
+            ].reverse();
+
+            const channelConfig = {
+                 type: 'bar',
+                 data: {
+                    labels: channelData.map(d => d.channel),
+                    datasets: [
+                        {
+                            label: '예상매출합계 (천원)',
+                            data: channelData.map(d => d.revenue),
+                            backgroundColor: 'rgba(22, 163, 74, 0.7)', // green-600
+                            borderColor: 'rgba(22, 163, 74, 1)',
+                            xAxisID: 'xAmount',
+                            order: 2
+                        },
+                        {
+                            label: '활동건수',
+                            data: channelData.map(d => d.count),
+                            backgroundColor: 'rgba(249, 115, 22, 0.7)', // orange-500
+                            borderColor: 'rgba(249, 115, 22, 1)',
+                            xAxisID: 'xCount',
+                            order: 3
+                        },
+                        {
+                            label: '평균 예상 매출 (천원)',
+                            data: channelData.map(d => d.count > 0 ? (d.revenue / d.count) : 0),
+                            type: 'scatter',
+                            xAxisID: 'xAmount',
+                            backgroundColor: 'rgba(220, 38, 38, 0.8)', // red-600
+                            borderColor: 'rgba(220, 38, 38, 1)',
+                            pointRadius: 5,
+                            pointHoverRadius: 7,
+                            order: 1
+                        }
+                    ]
+                 },
+                 options: {
+                    ...commonChartOptions,
+                    indexAxis: 'y',
+                    scales: {
+                        y: { ...commonChartOptions.scales.x, grid: { display: false }, ticks: { autoSkip: false } }, 
+                        xAmount: {
+                            type: 'linear',
+                            position: 'top',
+                            title: { display: true, text: '예상매출 (천원)' },
+                            ticks: { ...commonChartOptions.scales.y.ticks }
+                        },
+                        xCount: { 
+                            position: 'bottom', 
+                            title: { display: true, text: '활동건수' },
+                            grid: { drawOnChartArea: false },
+                            ticks: { 
+                               precision: 0, 
+                               callback: function(value) { return value.toLocaleString('ko-KR'); }
+                            }
+                        }
+                    },
+                    plugins: {
+                         ...commonChartOptions.plugins,
+                        legend: { position: 'bottom' },
+                        tooltip: {
+                             ...commonChartOptions.plugins.tooltip,
+                             callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || context.label || '';
+                                    if (label) { label += ': '; }
+                                    let value = context.raw;
+                                    
+                                    const currentChannel = channelData.find(d => d.channel === context.label);
+                                    let avgRevenue = 0;
+                                    if (currentChannel && currentChannel.count > 0) {
+                                        avgRevenue = (currentChannel.revenue / currentChannel.count);
+                                    }
+
+                                    if (typeof value === 'number') {
+                                        if (context.dataset.label === '활동건수') {
+                                            value = value.toLocaleString('ko-KR');
+                                            return [label + value, `평균 매출: ${avgRevenue.toLocaleString('ko-KR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}천원`];
+                                        } else {
+                                            value = value.toLocaleString('ko-KR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+                                             return [label + value, `평균 매출: ${avgRevenue.toLocaleString('ko-KR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}천원`];
+                                        }
+                                    }
+                                    return label + value;
+                                }
+                            }
+                        }
+                    },
+                    animation: {
+                        onComplete: () => hideLoadingMessage('kimDaminChannelChart')
+                    }
+                 }
+            };
+            createChart('kimDaminChannelChart', channelConfig, 'kimDaminChannelChartLoading');
+        }
+
+         function createChoiMinCharts() {
+            const pieConfig = {
+                 type: 'doughnut',
+                 data: {
+                    labels: ['Inbound', 'Outbound'],
+                    datasets: [{
+                        label: '건',
+                        data: [11, 0],
+                        backgroundColor: ['rgba(59, 130, 246, 0.8)', 'rgba(107, 114, 128, 0.7)'],
+                        borderColor: ['#FFFFFF', '#FFFFFF']
+                    }]
+                 },
+                 options: { ...pieOptions, animation: { onComplete: () => hideLoadingMessage('choiMinPieChart') } }
+            };
+            createChart('choiMinPieChart', pieConfig, 'choiMinPieChartLoading');
+
+            const revenuePieConfig = {
+                 type: 'doughnut',
+                 data: {
+                    labels: ['Inbound', 'Outbound'],
+                    datasets: [{
+                        label: '천원',
+                        data: [680.0, 0.0],
+                        backgroundColor: ['rgba(59, 130, 246, 0.8)', 'rgba(107, 114, 128, 0.7)'],
+                        borderColor: ['#FFFFFF', '#FFFFFF']
+                    }]
+                 },
+                 options: { ...pieOptions, animation: { onComplete: () => hideLoadingMessage('choiMinRevenuePieChart') } }
+            };
+             createChart('choiMinRevenuePieChart', revenuePieConfig, 'choiMinRevenuePieChartLoading');
+
+            const monthlyConfig = {
+                 type: 'bar',
+                 data: {
+                    labels: ['7월', '8월', '9월'],
+                    datasets: [{
+                        label: '예상매출 (천원)',
+                        data: [0.0, 600.0, 80.0],
+                        backgroundColor: ['#dbeafe', '#bfdbfe', '#93c5fd'],
+                        borderColor: '#60a5fa',
+                        borderWidth: 1
+                    }]
+                 },
+                 options: {
+                    ...commonChartOptions,
+                    scales: {
+                        x: { ...commonChartOptions.scales.x },
+                        y: { ...commonChartOptions.scales.y, suggestedMax: 700, ticks: { ...commonChartOptions.scales.y.ticks } }
+                     },
+                    plugins: { 
+                        legend: { display: false }, 
+                        tooltip: {
+                             ...commonChartOptions.plugins.tooltip,
+                             callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || context.label || '';
+                                    if (label) { label += ': '; }
+                                    let value = context.raw;
+                                    if (typeof value === 'number') {
+                                        value = value.toLocaleString('ko-KR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+                                    }
+                                    return label + value;
+                                }
+                            }
+                        }
+                    },
+                    animation: {
+                        onComplete: () => hideLoadingMessage('choiMinMonthlyChart')
+                    }
+                 }
+            };
+            createChart('choiMinMonthlyChart', monthlyConfig, 'choiMinMonthlyChartLoading');
+        }
+
+        // ---------------------------------------------------------------------
+        // 차트 생성 및 테이블 정렬 초기화 실행
+        // ---------------------------------------------------------------------
+        document.addEventListener('DOMContentLoaded', () => {
+            // 모든 차트 생성 함수 호출
+            createKpiChart();
+            createQ3ActivityChart();
+            createH1TrialChart();
+            createQ3TrialChart();
+            createMonthlyTrialChart();
+            createH1PricingChart();
+            createQ3PricingChart();
+            createMonthlyPricingChart();
+            createKimDaminCharts();
+            createChoiMinCharts();
+
+            // 테이블 정렬 초기화
+             document.querySelectorAll('.data-table th[data-sort-type]').forEach((header) => {
+                 const iconSpan = header.querySelector('.sort-icon');
+                 if (iconSpan) iconSpan.textContent = '▲▼';
+                 header.removeEventListener('click', header.clickHandler);
+                 header.clickHandler = () => {
+                     const tableId = header.closest('.data-table').id;
+                     const sortType = header.getAttribute('data-sort-type');
+                     const thIndex = Array.from(header.parentNode.children).indexOf(header);
+                     sortTable(tableId, thIndex, sortType);
+                 };
+                 header.addEventListener('click', header.clickHandler);
+             });
+        });
+
+    </script>
+</body>
+</html>
+
