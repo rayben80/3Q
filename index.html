@@ -13,7 +13,7 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         /* Noto Sans KR 폰트 (한국어용) */
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
-        
+
         body {
             font-family: 'Inter', 'Noto Sans KR', sans-serif;
             background-color: #f8fafc; /* bg-slate-50 */
@@ -136,7 +136,7 @@
             border-bottom: 2px solid #e5e7eb; /* border-b-2 border-gray-200 */
             padding-bottom: 0.5rem; /* pb-2 */
         }
-        
+
         /* Stat 카드용 H3 오버라이드 */
         .stat-card-title {
             font-size: 1rem; /* text-base */
@@ -163,6 +163,7 @@
             color: #94a3b8; /* slate-400 */
             font-size: 0.875rem; /* text-sm */
             z-index: 10; /* 차트 위에 보이도록 */
+            pointer-events: none; /* 클릭 이벤트 방지 */
         }
         .chart-wrapper {
             position: relative; /* 로딩 메시지 위치 기준 */
@@ -225,13 +226,13 @@
         <main>
             <!-- 1. Executive Summary -->
             <div id="summary" class="tab-content tab-content-active">
-                
+
                 <div class="report-card">
                     <h2>Executive Summary</h2>
                     <ul class="list-disc list-inside text-gray-700 space-y-2">
                          <li>상반기 Trial 전환율 <span class="percent">16.1%</span> (<span class="num">225/1,397</span>), Pricing 전환율 <span class="percent">27.7%</span> (<span class="num">36/130</span>)</li>
                         <li>3분기 Trial 전환율 <span class="percent">14.6%</span> (<span class="num">128/879</span>), Pricing 전환율 <span class="percent">19.4%</span> (<span class="num">36/186</span>)
-                           (<span class="change-negative">Trial -1.5%p</span>, <span class="change-negative">Pricing -8.3%p</span>)
+                           (<span class="change-negative">Trial -1.5%p</span>, <span class="change-negative">Pricing -8.3%p</span> vs 상반기)
                         </li>
                         <li>3분기 활동은 Inbound 중심으로 형성:
                             <ul class="list-disc list-inside ml-6 mt-1">
@@ -240,12 +241,14 @@
                             </ul>
                         </li>
                         <li>
-                            연간 합계 검증:
+                            연간 합계 검증 (리컨실리에이션):
                             <ul class="list-disc list-inside ml-6 mt-1">
                                 <li>김다민: <span class="num">128,393.2천원</span> = Q3 <span class="num">42,189.2천원</span> + Q3외 <span class="num">86,204.0천원</span></li>
                                 <li>최민: <span class="num">208,826.6천원</span> = Q3 <span class="num">680.0천원</span> + Q3외 <span class="num">208,146.6천원</span></li>
                             </ul>
                         </li>
+                        <li>이슈: ① 채널 원문 공백 ② Outbound 기록 밀도 낮음.</li>
+                        <li>요청: ① 채널 입력 템플릿 고정 ② Outbound 필수 필드 도입.</li>
                     </ul>
                 </div>
 
@@ -258,10 +261,10 @@
                             <canvas id="kpiChart"></canvas>
                             <div id="kpiChartLoading" class="chart-loading">차트 로딩 중...</div>
                         </div>
-                        <p class="chart-summary">※ 상반기 대비 3분기 전환율 하락 (Trial -1.5%p, Pricing -8.3%p)</p>
+                        <p class="chart-summary">※ Trial/Pricing 모두 상반기 대비 3분기 전환율 하락.</p>
                         <!-- KPI 테이블 -->
                         <table class="data-table mt-4" id="kpiTable">
-                            <thead>
+                             <thead>
                                 <tr>
                                     <th class="no-sort">구분<span class="sort-icon"></span></th>
                                     <th class="text-right" data-sort-type="number">배정건수<span class="sort-icon"></span></th>
@@ -271,6 +274,7 @@
                                 </tr>
                             </thead>
                             <tbody>
+                                <!-- 순서 변경: Trial -> Pricing -->
                                 <tr>
                                     <td>상반기 Trial</td>
                                     <td class="num text-right">1,397</td>
@@ -279,18 +283,18 @@
                                     <td class="text-right">-</td>
                                 </tr>
                                 <tr>
-                                    <td>상반기 Pricing</td>
-                                    <td class="num text-right">130</td>
-                                    <td class="num text-right">36</td>
-                                    <td class="percent text-right">27.7</td>
-                                     <td class="text-right">-</td>
-                                </tr>
-                                <tr>
                                     <td>3분기 Trial</td>
                                     <td class="num text-right">879</td>
                                     <td class="num text-right">128</td>
                                     <td class="percent text-right">14.6</td>
                                     <td class="change-negative text-right">-1.5</td>
+                                </tr>
+                                <tr>
+                                    <td>상반기 Pricing</td>
+                                    <td class="num text-right">130</td>
+                                    <td class="num text-right">36</td>
+                                    <td class="percent text-right">27.7</td>
+                                     <td class="text-right">-</td>
                                 </tr>
                                 <tr>
                                     <td>3분기 Pricing</td>
@@ -359,7 +363,7 @@
                         <p class="text-sm text-slate-500">(299 / 2,320 건)</p>
                     </div>
                 </div>
-                
+
                 <div class="report-card">
                     <h3>① 2025 상반기 Trial — 개인별 배정/유료전환 (전체인원)</h3>
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -533,7 +537,7 @@
                     <!-- 김다민 요약 -->
                     <div class="report-card">
                         <h3>⑤ 김다민 — Q3 요약</h3>
-                        
+
                         <div class="summary-chart-grid">
                             <div class="summary-chart-card">
                                 <p class="summary-chart-title">In/Outbound (건수)</p>
@@ -574,7 +578,7 @@
                             </tbody>
                         </table>
                     </div>
-                    
+
                     <!-- 최민 요약 -->
                     <div class="report-card">
                         <h3>⑤ 최민 — Q3 요약</h3>
@@ -687,9 +691,10 @@
                 event.currentTarget.classList.add('tab-active');
                 event.currentTarget.classList.remove('tab-inactive');
             }
+             // 탭 전환 시 차트 리사이즈 (애니메이션과 겹치지 않도록 약간 지연)
              setTimeout(() => {
                 window.dispatchEvent(new Event('resize'));
-             }, 0);
+             }, 50); // 50ms 지연
         }
 
         // ---------------------------------------------------------------------
@@ -703,33 +708,38 @@
             // '합계' 행과 같은 요약 행을 정렬에서 제외
             const rows = Array.from(tbody.querySelectorAll('tr')).filter(row => !row.classList.contains('font-bold'));
             const summaryRows = Array.from(tbody.querySelectorAll('tr')).filter(row => row.classList.contains('font-bold'));
-            
+
             if (rows.length === 0) return;
             const header = table.querySelectorAll('th')[columnIndex];
             if (!header || header.classList.contains('no-sort')) return;
             const isAscending = !header.classList.contains('sorted-asc');
-            
+
             // 모든 헤더의 정렬 상태 초기화
             table.querySelectorAll('th').forEach(th => {
                 th.classList.remove('sorted-asc', 'sorted-desc');
                 const icon = th.querySelector('.sort-icon');
                 if (icon) icon.textContent = '▲▼';
             });
-            
+
             rows.sort((a, b) => {
                 let cellA = a.querySelectorAll('td')[columnIndex];
                 let cellB = b.querySelectorAll('td')[columnIndex];
                 if (!cellA || !cellB) return 0;
                 let valA = cellA.textContent.trim();
                 let valB = cellB.textContent.trim();
-                
+
                 if (sortType === 'number') {
-                    // '-' 값은 정렬 시 가장 낮은 값으로 처리 (ASC 시 맨 위, DESC 시 맨 아래)
+                    // '-' 값은 정렬 시 가장 낮은 값 또는 높은 값으로 처리
                     if (valA === '-') valA = isAscending ? Infinity : -Infinity;
                     else valA = parseFloat(valA.replace(/[,%p천원]/g, '')) || 0;
-                     
+
                     if (valB === '-') valB = isAscending ? Infinity : -Infinity;
                     else valB = parseFloat(valB.replace(/[,%p천원]/g, '')) || 0;
+
+                    // NaN 값 처리 (항상 맨 아래로)
+                    if (isNaN(valA)) valA = isAscending ? Infinity : -Infinity;
+                    if (isNaN(valB)) valB = isAscending ? Infinity : -Infinity;
+
                 } else if (sortType === 'string') {
                     valA = valA.toLowerCase();
                     valB = valB.toLowerCase();
@@ -739,12 +749,12 @@
                 if (valA > valB) return isAscending ? 1 : -1;
                 return 0;
             });
-            
+
             // 정렬된 행 다시 추가
             rows.forEach(row => tbody.appendChild(row));
             // 요약 행(들)을 테이블 맨 아래에 다시 추가
             summaryRows.forEach(row => tbody.appendChild(row));
-            
+
             // 현재 클릭된 헤더에 정렬 상태 적용
             header.classList.toggle('sorted-asc', isAscending);
             header.classList.toggle('sorted-desc', !isAscending);
@@ -773,7 +783,7 @@
                             let label = context.dataset.label || context.label || '';
                             if (label) { label += ': '; }
                             let value = context.raw;
-                            
+
                             if (typeof value === 'number') {
                                 // %가 아닐 때만 소수점 1자리 표시 (금액/건수 등)
                                 if (!(context.dataset.yAxisID === 'yRate' || (context.dataset.label && context.dataset.label.includes('전환율')))) {
@@ -787,7 +797,7 @@
                                      value = value.toLocaleString('ko-KR'); // %는 그대로
                                 }
                             }
-                            
+
                             if (context.dataset.yAxisID === 'yRate' || (context.dataset.label && context.dataset.label.includes('전환율'))) {
                                 value += '%';
                             }
@@ -806,27 +816,38 @@
                         font: { family: "'Noto Sans KR', sans-serif" },
                         callback: function(value) {
                            if (typeof value === 'number') {
-                               // 로그 스케일 등에서 비정상적인 값 표시 방지
-                               if (value > 0 && Math.log10(value) % 1 !== 0 && this.type === 'logarithmic') {
-                                    return ''; // 로그 눈금의 중간 값들은 숨김
+                               // 로그 스케일 눈금 처리 개선: 1, 2, 5, 10, ... 패턴
+                               const logValue = Math.log10(value);
+                               const floorLog = Math.floor(logValue);
+                               const powerOf10 = Math.pow(10, floorLog);
+                               const firstDigit = value / powerOf10;
+
+                               if (this.type === 'logarithmic') {
+                                    // 1, 2, 5 * 10^n 형태의 눈금만 표시
+                                    if (firstDigit === 1 || firstDigit === 2 || firstDigit === 5 || value === 0) {
+                                         return value.toLocaleString('ko-KR');
+                                    }
+                                    return ''; // 나머지 숨김
+                               } else {
+                                   // 선형 스케일은 그대로 표시
+                                   return value.toLocaleString('ko-KR');
                                }
-                               return value.toLocaleString('ko-KR');
                            }
-                           return value;
+                           return value; // 숫자가 아닌 경우 그대로 반환
                         }
                     },
                     beginAtZero: true
                 }
             }
         };
-        
+
         const pieTooltipCallback = {
             label: function(context) {
                 let label = context.label || '';
                 if (label) { label += ': '; }
                 let value = context.raw;
                 let unit = context.dataset.label || ''; // 데이터셋 레이블에서 단위 가져오기 (예: '건', '천원')
-                
+
                 if (typeof value === 'number') {
                     if (unit === '천원') {
                         value = value.toLocaleString('ko-KR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
@@ -834,15 +855,14 @@
                         value = value.toLocaleString('ko-KR'); // 건수는 소수점 없이
                     }
                 }
-                
+
                 const total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
                 const percentage = total > 0 ? ((context.raw / total) * 100).toFixed(1) : 0;
-                
+
                 return `${label}: ${value}${unit ? unit : ''} (${percentage}%)`;
             }
         };
 
-        // ⭐️ FIX: pieOptions 정의 추가 (Turn 27에서 누락된 부분 복원)
         const pieOptions = {
             responsive: true,
             maintainAspectRatio: false,
@@ -857,7 +877,7 @@
         };
 
         // ---------------------------------------------------------------------
-        // 차트 생성 함수들
+        // 차트 생성 및 로딩 메시지 관리 함수
         // ---------------------------------------------------------------------
          function hideLoadingMessage(chartId) {
              const loadingEl = document.getElementById(chartId + 'Loading');
@@ -867,13 +887,36 @@
         }
 
         function createChart(id, config, loadingId) {
-            const ctx = document.getElementById(id)?.getContext('2d');
-            if (!ctx) return;
+            const canvas = document.getElementById(id);
+            if (!canvas) {
+                console.error(`Canvas element not found for ${id}`);
+                return;
+            }
+             // 로딩 메시지 요소 확인
+            const loadingEl = document.getElementById(loadingId);
+            if (!loadingEl) {
+                 console.warn(`Loading element not found for ${loadingId}`);
+            } else {
+                loadingEl.style.display = 'flex'; // 로딩 메시지 보이기
+            }
+
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error(`Failed to get 2D context for ${id}`);
+                 if (loadingEl) loadingEl.textContent = '캔버스 초기화 오류';
+                return;
+            }
+
             try {
+                // 기존 차트 인스턴스가 있으면 파괴
+                const existingChart = Chart.getChart(canvas);
+                if (existingChart) {
+                    existingChart.destroy();
+                }
+                // 새 차트 생성
                 new Chart(ctx, config);
             } catch (e) {
                 console.error(`Chart creation failed for ${id}:`, e);
-                const loadingEl = document.getElementById(loadingId);
                 if (loadingEl) {
                     loadingEl.textContent = '차트 로딩 실패';
                     loadingEl.style.color = '#dc2626'; // red-600
@@ -882,37 +925,41 @@
         }
 
 
+        // ---------------------------------------------------------------------
+        // 개별 차트 생성 함수들
+        // ---------------------------------------------------------------------
         function createKpiChart() {
             const config = {
                 type: 'bar',
                 data: {
-                    labels: ['상반기 Trial', '상반기 Pricing', '3분기 Trial', '3분기 Pricing'],
+                    // 순서 변경: Trial -> Pricing
+                    labels: ['상반기 Trial', '3분기 Trial', '상반기 Pricing', '3분기 Pricing'],
                     datasets: [
                         {
                             label: '유료전환율 (%)',
-                            data: [16.1, 27.7, 14.6, 19.4],
+                            data: [16.1, 14.6, 27.7, 19.4], // 순서 변경
                             backgroundColor: 'rgba(59, 130, 246, 0.1)',
                             borderColor: 'rgba(59, 130, 246, 1)',
-                            type: 'line', 
-                            yAxisID: 'yRate', 
+                            type: 'line',
+                            yAxisID: 'yRate',
                             tension: 0.1,
                             fill: true,
                             order: 1
                         },
                         {
                             label: '배정건수',
-                            data: [1397, 130, 879, 186],
+                            data: [1397, 879, 130, 186], // 순서 변경
                             backgroundColor: 'rgba(156, 163, 175, 0.5)',
                             borderColor: 'rgba(156, 163, 175, 1)',
-                            yAxisID: 'yCount', 
+                            yAxisID: 'yCount',
                             order: 2
                         },
                         {
                             label: '유료전환건수',
-                            data: [225, 36, 128, 36],
+                            data: [225, 128, 36, 36], // 순서 변경
                             backgroundColor: 'rgba(29, 78, 216, 0.7)',
                             borderColor: 'rgba(29, 78, 216, 1)',
-                            yAxisID: 'yCount', 
+                            yAxisID: 'yCount',
                             order: 3
                         }
                     ]
@@ -950,11 +997,9 @@
                             position: 'left',
                             beginAtZero: true,
                             title: { display: true, text: '건수' },
-                            ticks: { 
+                            ticks: {
                                precision: 0,
-                               callback: function(value) {
-                                   return value.toLocaleString('ko-KR');
-                               }
+                               callback: function(value) { return value.toLocaleString('ko-KR'); }
                             }
                         },
                         yRate: {
@@ -1004,20 +1049,21 @@
                             type: 'logarithmic',
                             position: 'left',
                             title: { display: true, text: '예상매출 (천원)' },
+                            min: 100, // 로그 스케일 시작점 명시
                             ticks: {
                                 callback: function(value, index, ticks) {
                                    const logValue = Math.log10(value);
-                                   if (value > 0 && logValue === Math.floor(logValue)) {
-                                       return value.toLocaleString('ko-KR');
+                                   const floorLog = Math.floor(logValue);
+                                   const powerOf10 = Math.pow(10, floorLog);
+                                   const firstDigit = value / powerOf10;
+
+                                   if (value > 0) {
+                                       if (firstDigit === 1 || firstDigit === 2 || firstDigit === 5) {
+                                            return value.toLocaleString('ko-KR');
+                                       }
                                    }
-                                   // 680과 42189를 모두 포함하는 범위이므로 수동 값 추가
-                                   if (value === 600 || value === 800 || value === 6000 || value === 8000) {
-                                       return value.toLocaleString('ko-KR');
-                                   }
-                                   return '';
+                                   return ''; // 나머지 숨김
                                },
-                               suggestedMin: 100, 
-                               suggestedMax: 50000 
                             }
                         },
                         yCount: {
@@ -1091,11 +1137,9 @@
                         yCount: {
                             position: 'left',
                             title: { display: true, text: '배정건수' },
-                            ticks: { 
+                            ticks: {
                                precision: 0,
-                               callback: function(value) {
-                                   return value.toLocaleString('ko-KR');
-                               }
+                               callback: function(value) { return value.toLocaleString('ko-KR'); }
                             }
                         },
                         yRate: {
@@ -1164,15 +1208,13 @@
                         }
                     },
                     scales: {
-                        x: { ticks: { ...commonChartOptions.scales.x.ticks, maxRotation: 45, minRotation: 45 } }, 
+                        x: { ticks: { ...commonChartOptions.scales.x.ticks, maxRotation: 45, minRotation: 45 } },
                         yCount: {
                             position: 'left',
                             title: { display: true, text: '배정건수' },
                             ticks: {
                                precision: 0,
-                               callback: function(value) {
-                                   return value.toLocaleString('ko-KR');
-                               }
+                               callback: function(value) { return value.toLocaleString('ko-KR'); }
                             }
                         },
                         yRate: {
@@ -1206,7 +1248,7 @@
                         },
                         {
                             label: '박진희 (전환율 %)',
-                            data: [5.0, 13.3, 33.3, 100.0, null, 9.4, 16.6, 16.7, 0.0], 
+                            data: [5.0, 13.3, 33.3, 100.0, null, 9.4, 16.6, 16.7, 0.0],
                             borderColor: 'rgba(34, 197, 94, 1)', // green-500
                             backgroundColor: 'rgba(34, 197, 94, 0.1)',
                             tension: 0.1,
@@ -1215,7 +1257,7 @@
                         },
                          {
                             label: '최민 (전환율 %)',
-                            data: [18.2, 15.1, null, null, null, null, 19.0, 20.0, 20.0], 
+                            data: [18.2, 15.1, null, null, null, null, 19.0, 20.0, 20.0],
                             borderColor: 'rgba(59, 130, 246, 1)', // blue-500
                             backgroundColor: 'rgba(59, 130, 246, 0.1)',
                             tension: 0.1,
@@ -1238,9 +1280,8 @@
                                     if (typeof value === 'number') {
                                         value = value.toLocaleString('ko-KR');
                                     }
-                                    if (context.dataset.yAxisID === 'yRate' || (context.dataset.label && context.dataset.label.includes('전환율'))) {
-                                        value += '%';
-                                    }
+                                    // 월별 차트는 모두 % 이므로 yAxisID 체크 불필요
+                                    value += '%';
                                     return label + value;
                                 }
                             }
@@ -1317,11 +1358,9 @@
                         yCount: {
                             position: 'left',
                             title: { display: true, text: '배정건수' },
-                            ticks: { 
+                            ticks: {
                                precision: 0,
-                               callback: function(value) {
-                                   return value.toLocaleString('ko-KR');
-                               }
+                               callback: function(value) { return value.toLocaleString('ko-KR'); }
                             }
                         },
                         yRate: {
@@ -1394,11 +1433,9 @@
                         yCount: {
                             position: 'left',
                             title: { display: true, text: '배정건수' },
-                             ticks: { 
+                             ticks: {
                                precision: 0,
-                               callback: function(value) {
-                                   return value.toLocaleString('ko-KR');
-                               }
+                               callback: function(value) { return value.toLocaleString('ko-KR'); }
                             }
                         },
                         yRate: {
@@ -1433,7 +1470,7 @@
                         },
                         {
                             label: '박진희 (전환율 %)',
-                            data: [25.0, 0.0, 9.1, 33.3, 71.4, 66.7, 22.7, 17.6, 42.9], 
+                            data: [25.0, 0.0, 9.1, 33.3, 71.4, 66.7, 22.7, 17.6, 42.9],
                             borderColor: 'rgba(34, 197, 94, 1)', // green-500
                             backgroundColor: 'rgba(34, 197, 94, 0.1)',
                             tension: 0.1,
@@ -1463,9 +1500,8 @@
                                     if (typeof value === 'number') {
                                         value = value.toLocaleString('ko-KR');
                                     }
-                                    if (context.dataset.yAxisID === 'yRate' || (context.dataset.label && context.dataset.label.includes('전환율'))) {
-                                        value += '%';
-                                    }
+                                     // 월별 차트는 모두 % 이므로 yAxisID 체크 불필요
+                                    value += '%';
                                     return label + value;
                                 }
                             }
@@ -1534,10 +1570,10 @@
                     ...commonChartOptions,
                      scales: {
                         x: { ...commonChartOptions.scales.x },
-                        y: { ...commonChartOptions.scales.y, ticks: { ...commonChartOptions.scales.y.ticks } }
+                        y: { ...commonChartOptions.scales.y, ticks: { ...commonChartOptions.scales.y.ticks } } // 기본 쉼표 포맷팅 사용
                      },
-                    plugins: { 
-                        legend: { display: false }, 
+                    plugins: {
+                        legend: { display: false },
                         tooltip: {
                              ...commonChartOptions.plugins.tooltip,
                              callbacks: {
@@ -1560,6 +1596,7 @@
             };
             createChart('kimDaminMonthlyChart', monthlyConfig, 'kimDaminMonthlyChartLoading');
 
+            // 채널 데이터 (가로 막대+점 차트용)
             const channelData = [
                 { channel: '고객 문의', count: 50, revenue: 12965.0 }, { channel: '소개', count: 14, revenue: 5880.0 },
                 { channel: '모두싸인', count: 12, revenue: 1500.0 }, { channel: '네이버 검색', count: 10, revenue: 1400.0 },
@@ -1569,7 +1606,7 @@
                 { channel: 'DM', count: 4, revenue: 600.0 }, { channel: '대표님 소개', count: 3, revenue: 500.0 },
                 { channel: '본부장님 소개', count: 2, revenue: 400.0 }, { channel: '파트너 소개', count: 2, revenue: 300.0 },
                 { channel: '행사 리드', count: 2, revenue: 280.0 }
-            ].reverse();
+            ].reverse(); // 차트 표시는 역순 (아래부터 위로)
 
             const channelConfig = {
                  type: 'bar',
@@ -1581,47 +1618,48 @@
                             data: channelData.map(d => d.revenue),
                             backgroundColor: 'rgba(22, 163, 74, 0.7)', // green-600
                             borderColor: 'rgba(22, 163, 74, 1)',
-                            xAxisID: 'xAmount',
-                            order: 2
+                            xAxisID: 'xAmount', // 수평 차트에서는 x축이 값 축
+                            order: 2 // 점 뒤에 막대가 오도록 순서 조정
                         },
                         {
                             label: '활동건수',
                             data: channelData.map(d => d.count),
                             backgroundColor: 'rgba(249, 115, 22, 0.7)', // orange-500
                             borderColor: 'rgba(249, 115, 22, 1)',
-                            xAxisID: 'xCount',
+                            xAxisID: 'xCount', // 건수 축 사용
                             order: 3
                         },
                         {
                             label: '평균 예상 매출 (천원)',
                             data: channelData.map(d => d.count > 0 ? (d.revenue / d.count) : 0),
-                            type: 'scatter',
-                            xAxisID: 'xAmount',
+                            type: 'scatter', // 점(Scatter) 타입으로 변경
+                            xAxisID: 'xAmount', // 매출 축 사용
                             backgroundColor: 'rgba(220, 38, 38, 0.8)', // red-600
                             borderColor: 'rgba(220, 38, 38, 1)',
-                            pointRadius: 5,
-                            pointHoverRadius: 7,
-                            order: 1
+                            pointRadius: 5, // 점 크기
+                            pointHoverRadius: 7, // 호버 시 점 크기
+                            order: 1 // 점이 가장 위에 오도록 순서 조정
                         }
                     ]
                  },
                  options: {
                     ...commonChartOptions,
-                    indexAxis: 'y',
+                    indexAxis: 'y', // 가로 막대 차트
                     scales: {
-                        y: { ...commonChartOptions.scales.x, grid: { display: false }, ticks: { autoSkip: false } }, 
-                        xAmount: {
+                        y: { ...commonChartOptions.scales.x, grid: { display: false }, ticks: { autoSkip: false } },
+                        xAmount: { // 매출 (천원) 축
                             type: 'linear',
-                            position: 'top',
+                            position: 'top', // 위쪽 축
                             title: { display: true, text: '예상매출 (천원)' },
-                            ticks: { ...commonChartOptions.scales.y.ticks }
+                            ticks: { ...commonChartOptions.scales.y.ticks }, // 기본 쉼표 포맷팅
+                            grid: { color: '#e5e7eb' } // 연한 그리드 라인 추가
                         },
-                        xCount: { 
-                            position: 'bottom', 
+                        xCount: { // 건수 축
+                            position: 'bottom', // 아래쪽 축
                             title: { display: true, text: '활동건수' },
-                            grid: { drawOnChartArea: false },
-                            ticks: { 
-                               precision: 0, 
+                            grid: { drawOnChartArea: false }, // 그리드 숨김
+                            ticks: {
+                               precision: 0,
                                callback: function(value) { return value.toLocaleString('ko-KR'); }
                             }
                         }
@@ -1631,6 +1669,7 @@
                         legend: { position: 'bottom' },
                         tooltip: {
                              ...commonChartOptions.plugins.tooltip,
+                             // 툴팁 콜백: 점 데이터셋은 '평균 매출' 레이블로, 나머지는 원래대로
                              callbacks: {
                                 label: function(context) {
                                     let label = context.dataset.label || context.label || '';
@@ -1643,16 +1682,29 @@
                                         avgRevenue = (currentChannel.revenue / currentChannel.count);
                                     }
 
+                                    // 데이터셋 인덱스 확인 (점 데이터셋은 2번)
+                                    if (context.datasetIndex === 2) {
+                                        label = '평균 예상 매출 (천원): '; // 레이블 변경
+                                        value = avgRevenue; // 평균값 사용
+                                    }
+
                                     if (typeof value === 'number') {
                                         if (context.dataset.label === '활동건수') {
                                             value = value.toLocaleString('ko-KR');
-                                            return [label + value, `평균 매출: ${avgRevenue.toLocaleString('ko-KR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}천원`];
+                                            // 건수 툴팁에는 평균 매출 정보 제거 (점 툴팁에서 보여주므로)
+                                            return label + value;
                                         } else {
+                                             // 매출, 평균 매출은 소수점 1자리
                                             value = value.toLocaleString('ko-KR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
-                                             return [label + value, `평균 매출: ${avgRevenue.toLocaleString('ko-KR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}천원`];
+                                             // 매출 툴팁에는 평균 매출 정보 제거
+                                             if (context.datasetIndex !== 2) {
+                                                return label + value;
+                                             }
+                                             // 점 툴팁은 그대로 반환
+                                             return label + value;
                                         }
                                     }
-                                    return label + value;
+                                    return label + value; // 기본 반환
                                 }
                             }
                         }
@@ -1714,8 +1766,8 @@
                         x: { ...commonChartOptions.scales.x },
                         y: { ...commonChartOptions.scales.y, suggestedMax: 700, ticks: { ...commonChartOptions.scales.y.ticks } }
                      },
-                    plugins: { 
-                        legend: { display: false }, 
+                    plugins: {
+                        legend: { display: false },
                         tooltip: {
                              ...commonChartOptions.plugins.tooltip,
                              callbacks: {
@@ -1740,7 +1792,7 @@
         }
 
         // ---------------------------------------------------------------------
-        // 차트 생성 및 테이블 정렬 초기화 실행
+        // 초기화 실행
         // ---------------------------------------------------------------------
         document.addEventListener('DOMContentLoaded', () => {
             // 모든 차트 생성 함수 호출
@@ -1759,14 +1811,16 @@
              document.querySelectorAll('.data-table th[data-sort-type]').forEach((header) => {
                  const iconSpan = header.querySelector('.sort-icon');
                  if (iconSpan) iconSpan.textContent = '▲▼';
-                 header.removeEventListener('click', header.clickHandler);
-                 header.clickHandler = () => {
-                     const tableId = header.closest('.data-table').id;
-                     const sortType = header.getAttribute('data-sort-type');
-                     const thIndex = Array.from(header.parentNode.children).indexOf(header);
-                     sortTable(tableId, thIndex, sortType);
-                 };
-                 header.addEventListener('click', header.clickHandler);
+                 // 클릭 핸들러 중복 등록 방지
+                 if (!header.clickHandlerAttached) {
+                     header.clickHandlerAttached = true; // 플래그 설정
+                     header.addEventListener('click', () => {
+                         const tableId = header.closest('.data-table').id;
+                         const sortType = header.getAttribute('data-sort-type');
+                         const thIndex = Array.from(header.parentNode.children).indexOf(header);
+                         sortTable(tableId, thIndex, sortType);
+                     });
+                 }
              });
         });
 
